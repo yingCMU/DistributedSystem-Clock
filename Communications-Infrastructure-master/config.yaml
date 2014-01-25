@@ -1,0 +1,57 @@
+# Defines which nodes are used in the system and how to connect to them.
+# This element should only be referenced during the constructor's initial
+# setup.
+# All names must be unique.
+# No other nodes are known.
+# These names will be used for src and dest addresses for the Message
+# The local node¡¯s name is included in this list
+configuration:
+    - name: alice
+      ip: 192.168.1.101
+      port: 12344 # This is the incoming port on which MP will listen
+                  # May be changed for further communication as usual
+    - name: bob
+      ip: 192.168.1.112
+      port: 14255
+    - name: charlie
+      ip: 128.2.130.19
+      port: 12998
+    - name: daphnie
+      ip: 192.168.1.87
+      port: 1987
+    - name: P1
+      ip: 128.237.191.106
+      port: 11111
+    - name: P2
+      ip: 128.237.191.106
+      port: 22222
+    - name: jing1
+      ip: 172.31.52.72
+      port: 2013
+    - name: jing2
+      ip: 172.31.52.253
+      port: 2014
+
+sendRules:
+    - action: duplicate # Ack message number 4 from bob to alice will not be sent
+      dest: P1
+    - action: duplicate # Ack message number 4 from bob to alice will not be sent
+      dest: P2
+    - action: delay # Ack message number 4 from bob to alice will not be sent
+      dest: jing
+      kind: Ack
+      seqNum: 3
+    - action: duplicate # Ack message number 4 from bob to alice will not be sent
+      dest: jing
+      kind: Ack
+      seqNum: 1
+    - action: delay # Every Lookup message in the system will be delayed
+      kind: Lookup
+
+receiveRules:
+    - action: duplicate # 3rd message from Charlie that anyone
+      src: charlie # receives will be duplicated
+      seqNum: 3
+    - action: delay
+      src: P1 # receives will be duplicated
+    
