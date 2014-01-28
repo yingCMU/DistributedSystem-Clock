@@ -10,17 +10,17 @@ import java.util.concurrent.LinkedBlockingDeque;
 
 import org.apache.log4j.Logger;
 
-import DistSysLab0.Message.Message;
+import DistSysLab0.Message.TimeStampMessage;
 import DistSysLab0.Model.NodeBean;
 
 public class SenderThread implements Runnable {
     private static Logger logger = Logger.getLogger(SenderThread.class);
 
-    private LinkedBlockingDeque<Message> sendQueue;
+    private LinkedBlockingDeque<TimeStampMessage> sendQueue;
     private HashMap<String, NodeBean> nodeList;
     private Socket socket;
 
-    public SenderThread(LinkedBlockingDeque<Message> sendQueue, LinkedBlockingDeque<Message> delayQueue, HashMap<String, NodeBean> nodeList) {
+    public SenderThread(LinkedBlockingDeque<TimeStampMessage> sendQueue, LinkedBlockingDeque<TimeStampMessage> delayQueue, HashMap<String, NodeBean> nodeList) {
         this.sendQueue = sendQueue;
         this.nodeList = nodeList;
     }
@@ -31,7 +31,7 @@ public class SenderThread implements Runnable {
             // if there is one non-delay message, put all delay message into sendQueue
             while(!sendQueue.isEmpty()) {
                 // Send all message in sendQueue
-                Message message = sendQueue.pollFirst();
+                TimeStampMessage message = sendQueue.pollFirst();
                 String serverName = message.getDest();
                 String servIp = nodeList.get(serverName).getIp();
                 int servPort = nodeList.get(serverName).getPort();
@@ -43,8 +43,8 @@ public class SenderThread implements Runnable {
                     objectOutputStream.flush();
                 }
                 catch (ConnectException e) {
-                    logger.error("ERROR: Message send failure, node offline " + message.toString());
-                    System.out.println("ERROR: Message send failure, node offline " + message.toString());
+                    logger.error("ERROR: TimeStampMessage send failure, node offline " + message.toString());
+                    System.out.println("ERROR: TimeStampMessage send failure, node offline " + message.toString());
                 }
                 catch (IOException e) {
                     e.printStackTrace();

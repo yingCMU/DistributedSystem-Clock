@@ -32,7 +32,11 @@ public class Message implements Serializable {
     }
 
     public Message(String src, String dest, String kind, Object data) {
-		
+    	this.src = src;
+    	this.dest = dest;
+        this.kind = kind;
+        this.data = data;
+        this.duplicate = false;
 	}
 
 	public int getSeqNum() {

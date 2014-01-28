@@ -1,4 +1,4 @@
-package DistSysLab0.Model;
+package DistSysLab0.TimeStamp;
 
 import java.io.Serializable;
 

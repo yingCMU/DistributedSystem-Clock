@@ -9,18 +9,26 @@ import java.util.concurrent.LinkedBlockingDeque;
 
 import org.apache.log4j.Logger;
 
-import DistSysLab0.Message.Message;
+
+
+
+
+import DistSysLab0.clock.ClockFactory;
+import DistSysLab0.clock.ClockService;
+import DistSysLab0.clock.ClockType;
+import DistSysLab0.Message.TimeStampMessage;
 import DistSysLab0.Model.*;
 import DistSysLab0.Model.RuleBean.RuleAction;
+import DistSysLab0.TimeStamp.TimeStamp;
 
 public class MessagePasser {
     private static MessagePasser instance;
     private static Logger logger = Logger.getLogger(MessagePasser.class);
-
-    private LinkedBlockingDeque<Message> sendQueue = new LinkedBlockingDeque<Message>();
-    private LinkedBlockingDeque<Message> sendDelayQueue = new LinkedBlockingDeque<Message>();
-    private LinkedBlockingDeque<Message> recvQueue = new LinkedBlockingDeque<Message>();
-    private LinkedBlockingDeque<Message> recvDelayQueue = new LinkedBlockingDeque<Message>();
+    ClockService clock;
+    private LinkedBlockingDeque<TimeStampMessage> sendQueue = new LinkedBlockingDeque<TimeStampMessage>();
+    private LinkedBlockingDeque<TimeStampMessage> sendDelayQueue = new LinkedBlockingDeque<TimeStampMessage>();
+    private LinkedBlockingDeque<TimeStampMessage> recvQueue = new LinkedBlockingDeque<TimeStampMessage>();
+    private LinkedBlockingDeque<TimeStampMessage> recvDelayQueue = new LinkedBlockingDeque<TimeStampMessage>();
     private HashMap<String, NodeBean> nodeList = new HashMap<String, NodeBean>();
     private ArrayList<RuleBean> sendRules = new ArrayList<RuleBean>();
     private ArrayList<RuleBean> recvRules = new ArrayList<RuleBean>();
@@ -32,6 +40,7 @@ public class MessagePasser {
 
     private ListenerThread listener;
     private SenderThread sender;
+	private ClockType clockType = ClockType.LOGICAL;
 
     /**
      * Actual constructor for MessagePasser
@@ -50,7 +59,8 @@ public class MessagePasser {
         sendRules = ConfigParser.readSendRules();
         recvRules = ConfigParser.readRecvRules();
         MD5Last = ConfigParser.getMD5Checksum(configFile);
-
+        clock = ClockFactory.getClock(clockType, localName, nodeList.size(), nodeList);
+		
         if(nodeList.get(localName) == null) {
             logger.error("The local name is incorrect.");
             System.exit(0);
@@ -61,12 +71,22 @@ public class MessagePasser {
         }
         else {
             listener = new ListenerThread(nodeList.get(localName).getPort(), configFile,
-                                            recvRules, sendRules, recvQueue, recvDelayQueue);
+                                            recvRules, sendRules, recvQueue, recvDelayQueue,clock);
             sender = new SenderThread(sendQueue, sendDelayQueue, nodeList);
         }
 
         logger.debug(this.toString());
     }
+    
+    /*using messageparser to send log message*/
+    //LogLevel level,
+    private void sendToLogger( String msg) {
+		TimeStampMessage tsMesseage = new TimeStampMessage(localName, "logger", "log", msg);
+		tsMesseage.setTimeStamp(clock.getCurrentTimeStamp(localName));
+		//logger.log(tsMesseage);
+		String text= localName+": "+"\nmessage: "+msg+"\ntime: "+clock.getCurrentTimeStamp(localName).getVal();
+		logger.debug(text);
+	}
 
     /**
      * Initialization for receive thread.
@@ -112,11 +132,12 @@ public class MessagePasser {
      *
      * @param message The message need to be sent.
      */
-    public void send(Message message) {
+    public void send(TimeStampMessage message) {
         // Set source and seq of the massage
         message.setSrc(localName);
         message.setSeqNum(curSeqNum++);
-
+        TimeStamp ts = clock.getNewTimeStamp(localName);// TODO keep
+		message.setTimeStamp(ts);
         // Check if the configuration file has been changed.
         String MD5 = ConfigParser.getMD5Checksum(configFile);
         if (!MD5.equals(MD5Last)) {
@@ -143,7 +164,7 @@ public class MessagePasser {
             // Add this message into sendQueue.
             sendQueue.add(message);
             // Add a duplicate message into sendQueue.
-            Message copy = message.copyOf();
+            TimeStampMessage copy = (TimeStampMessage) message.copyOf();
             copy.setDuplicate(true);
             sendQueue.add(copy);
             sendQueue.addAll(sendDelayQueue);
@@ -169,8 +190,8 @@ public class MessagePasser {
      *
      * @return A message
      */
-    public Message receive() {
-        Message message = null;
+    public TimeStampMessage receive() {
+        TimeStampMessage message = null;
         synchronized (recvQueue) {
             if (!recvQueue.isEmpty()) {
                 message = recvQueue.poll();

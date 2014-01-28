@@ -6,6 +6,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 import DistSysLab0.Message.TimeStampMessage;
 import DistSysLab0.Model.*;
+import DistSysLab0.TimeStamp.LogicalTimeStamp;
 
 public class LogicalClock extends ClockService {
 

@@ -8,25 +8,27 @@ import java.util.concurrent.LinkedBlockingDeque;
 
 import org.apache.log4j.Logger;
 
-import DistSysLab0.Message.Message;
+import DistSysLab0.Message.TimeStampMessage;
 import DistSysLab0.Model.RuleBean;
-
+import DistSysLab0.clock.*;
 public class ListenerThread implements Runnable {
     private static Logger logger = Logger.getLogger(ListenerThread.class);
     private String configFile;
     private int port;
     private ArrayList<RuleBean> recvRules;
     private ArrayList<RuleBean> sendRules;
-    private LinkedBlockingDeque<Message> recvQueue;
-    private LinkedBlockingDeque<Message> recvDelayQueue;
+    private LinkedBlockingDeque<TimeStampMessage> recvQueue;
+    private LinkedBlockingDeque<TimeStampMessage> recvDelayQueue;
     private ServerSocket listenSocket;
     private Thread thread;
+    private ClockService clock;
 
     public ListenerThread(int port, String configFile,
                             ArrayList<RuleBean> recvRules, ArrayList<RuleBean> sendRules,
-                            LinkedBlockingDeque<Message> recvQueue,
-                            LinkedBlockingDeque<Message> recvDelayQueue) {
+                            LinkedBlockingDeque<DistSysLab0.Message.TimeStampMessage> recvQueue,
+                            LinkedBlockingDeque<TimeStampMessage> recvDelayQueue,ClockService clock) {
         this.port = port;
+        this.clock = clock;
         this.recvQueue = recvQueue;
         this.recvDelayQueue = recvDelayQueue;
         this.recvRules = recvRules;
@@ -44,7 +46,7 @@ public class ListenerThread implements Runnable {
                 logger.info("Handling client at " + socket.getRemoteSocketAddress());
 
                 // Create a new thread for new incoming connection.
-                thread = new Thread(new ReceiverThread(socket, configFile, recvRules, sendRules, recvQueue, recvDelayQueue));
+                thread = new Thread(new ReceiverThread(socket, configFile, recvRules, sendRules, recvQueue, recvDelayQueue,clock));
                 thread.start();
             }
         }

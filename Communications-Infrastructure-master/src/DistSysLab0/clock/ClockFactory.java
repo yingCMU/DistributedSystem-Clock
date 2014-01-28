@@ -9,8 +9,6 @@ public abstract class ClockFactory {
 	
 	
 	private static ClockService clock = null;
-	protected TimeStamp myTimeStamp;
-	
 	//TODO factory pattern ok???
 	public static ClockService getClock(ClockType clockType, String localName,int numOfNode,HashMap<String,NodeBean> nodelist) {
 		switch (clockType) {

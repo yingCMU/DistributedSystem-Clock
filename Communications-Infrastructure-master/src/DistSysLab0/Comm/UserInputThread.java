@@ -6,7 +6,7 @@ import java.io.InputStreamReader;
 
 import org.apache.log4j.Logger;
 
-import DistSysLab0.Message.Message;
+import DistSysLab0.Message.TimeStampMessage;
 
 public class UserInputThread implements Runnable {
     private static Logger logger = Logger.getLogger(UserInputThread.class);
@@ -22,26 +22,26 @@ public class UserInputThread implements Runnable {
             while(!command.equals("quit")) {
                 command = in.readLine();
                 if(command.equals("send")) {
-                    System.out.println("Message dest:");
+                    System.out.println("TimeStampMessage dest:");
                     String dest = in.readLine();
                     while(!msgPasser.getNodeList().containsKey(dest)) {
                         System.out.println("Dest not existed, try again:");
                         dest = in.readLine();
                     }
 
-                    System.out.println("Message kind (any string):");
+                    System.out.println("TimeStampMessage kind (any string):");
                     String kind = in.readLine();
-                    System.out.println("Message data:");
+                    System.out.println("TimeStampMessage data:");
                     String data = in.readLine();
 
-                    Message msg = new Message(dest, kind, data);
+                    TimeStampMessage msg = new TimeStampMessage(dest, kind, data);
                     msgPasser.send(msg);
                     
                     System.out.println("Send Success:");
                     System.out.println(msg.toString());
                 }
                 else if(command.equals("receive")) {
-                    Message msg = msgPasser.receive();
+                    TimeStampMessage msg = msgPasser.receive();
                     if(msg == null) {
                         System.out.println("Nothing received.");
                     }

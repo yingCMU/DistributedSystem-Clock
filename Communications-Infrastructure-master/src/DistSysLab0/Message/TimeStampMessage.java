@@ -2,6 +2,7 @@ package DistSysLab0.Message;
 
 import DistSysLab0.Message.*;
 import DistSysLab0.Model.*;
+import DistSysLab0.TimeStamp.TimeStamp;
 public class TimeStampMessage extends Message {
 	/**
 	 * 
@@ -11,6 +12,10 @@ public class TimeStampMessage extends Message {
 	
 	public TimeStampMessage(String src, String dest, String kind, Object data) {
 		super(src, dest, kind, data);
+	}
+
+	public TimeStampMessage(String dest, String kind, String data) {
+		super( dest, kind, data);
 	}
 
 	private TimeStamp timeStamp;

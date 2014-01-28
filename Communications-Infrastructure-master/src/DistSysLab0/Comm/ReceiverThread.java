@@ -9,9 +9,17 @@ import java.util.concurrent.LinkedBlockingDeque;
 
 import org.apache.log4j.Logger;
 
-import DistSysLab0.Message.Message;
+
+
+
+
+
+
+import DistSysLab0.Message.TimeStampMessage;
 import DistSysLab0.Model.RuleBean;
 import DistSysLab0.Model.RuleBean.RuleAction;
+import DistSysLab0.TimeStamp.TimeStamp;
+import DistSysLab0.clock.ClockService;
 
 public class ReceiverThread implements Runnable {
     private static Logger logger = Logger.getLogger(ReceiverThread.class);
@@ -20,18 +28,20 @@ public class ReceiverThread implements Runnable {
     private ObjectInputStream in;
     private ArrayList<RuleBean> recvRules;
     private ArrayList<RuleBean> sendRules;
-    private LinkedBlockingDeque<Message> recvQueue;
-    private LinkedBlockingDeque<Message> recvDelayQueue;
+	private ClockService clock;
+    private LinkedBlockingDeque<TimeStampMessage> recvQueue;
+    private LinkedBlockingDeque<TimeStampMessage> recvDelayQueue;
     private String configFile;
     private String MD5Last;
 
     public ReceiverThread(Socket socket, String configFile,
                             ArrayList<RuleBean> recvRules, ArrayList<RuleBean> sendRules,
-                            LinkedBlockingDeque<Message> recvQueue,
-                            LinkedBlockingDeque<Message> recvDelayQueue) {
+                            LinkedBlockingDeque<TimeStampMessage> recvQueue,
+                            LinkedBlockingDeque<TimeStampMessage> recvDelayQueue,ClockService clock) {
         this.socket = socket;
         this.recvQueue = recvQueue;
         this.in = null;
+        this.clock = clock;
         this.recvDelayQueue = recvDelayQueue;
         this.recvRules = recvRules;
         this.configFile = configFile;
@@ -43,7 +53,7 @@ public class ReceiverThread implements Runnable {
     public void run() {
         try {
             while(true) {
-                Message message = null;
+                TimeStampMessage message = null;
                 String MD5 = ConfigParser.getMD5Checksum(configFile);
                 if (!MD5.equals(MD5Last)) {
                     sendRules = ConfigParser.readSendRules();
@@ -52,7 +62,7 @@ public class ReceiverThread implements Runnable {
                 }
 
                 in = new ObjectInputStream(new BufferedInputStream(socket.getInputStream()));
-                if((message = (Message) (in.readObject())) != null) {
+                if((message = (TimeStampMessage) (in.readObject())) != null) {
                     // Try to match a rule and act corresponding
                     // The match procedure should be in the listener thread
                     logger.info((String) message.getData());
@@ -62,7 +72,11 @@ public class ReceiverThread implements Runnable {
                             action = rule.getAction();
                         }
                     }
-
+                    synchronized (clock) {
+                    	clock.updateTimeStampOnReceive(message.getDest(), message);
+                    	logger.info("clock updated as "+clock.getCurrentTimeStamp(null).getVal());
+                    	
+                    }
                     synchronized(recvQueue) {
                         // Do action according to the matched rule's type.
                         // if one non-delay message comes(even with drop kind?),
@@ -75,7 +89,7 @@ public class ReceiverThread implements Runnable {
                                 // Add this message into recvQueue.
                                 recvQueue.add(message);
                                 // Add a duplicate message into recvQueue.
-                                Message copy = message.copyOf();
+                                TimeStampMessage copy = (TimeStampMessage) message.copyOf();
                                 copy.setDuplicate(true);
                                 recvQueue.add(copy);
                                 recvQueue.addAll(recvDelayQueue);
