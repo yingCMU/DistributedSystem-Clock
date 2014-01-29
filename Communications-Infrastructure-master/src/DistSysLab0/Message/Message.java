@@ -1,4 +1,6 @@
-package distSysLab0;
+package DistSysLab0.Message;
+
+
 
 import java.io.Serializable;
 
@@ -29,7 +31,11 @@ public class Message implements Serializable {
         this.duplicate = false;
     }
 
-    public int getSeqNum() {
+    public Message(String src, String dest, String kind, Object data) {
+		
+	}
+
+	public int getSeqNum() {
         return seqNum;
     }
 
