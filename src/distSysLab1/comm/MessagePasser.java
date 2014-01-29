@@ -21,7 +21,7 @@ import distSysLab1.timeStamp.TimeStamp;
 public class MessagePasser {
     private static MessagePasser instance;
     private static Logger logger = Logger.getLogger(MessagePasser.class);
-    ClockService clock;
+    private  ClockService clockServ;
     private LinkedBlockingDeque<TimeStampMessage> sendQueue = new LinkedBlockingDeque<TimeStampMessage>();
     private LinkedBlockingDeque<TimeStampMessage> sendDelayQueue = new LinkedBlockingDeque<TimeStampMessage>();
     private LinkedBlockingDeque<TimeStampMessage> recvQueue = new LinkedBlockingDeque<TimeStampMessage>();
@@ -56,7 +56,7 @@ public class MessagePasser {
         sendRules = ConfigParser.readSendRules();
         recvRules = ConfigParser.readRecvRules();
         MD5Last = ConfigParser.getMD5Checksum(configFile);
-        clock = ClockFactory.getClock(clockType, localName, nodeList.size(), nodeList);
+        clockServ = ClockFactory.getClock(clockType, localName, nodeList.size(), nodeList);
 		
         if(nodeList.get(localName) == null) {
             logger.error("The local name is incorrect.");
@@ -68,7 +68,7 @@ public class MessagePasser {
         }
         else {
             listener = new ListenerThread(nodeList.get(localName).getPort(), configFile,
-                                            recvRules, sendRules, recvQueue, recvDelayQueue,clock);
+                                            recvRules, sendRules, recvQueue, recvDelayQueue,clockServ);
             sender = new SenderThread(sendQueue, sendDelayQueue, nodeList);
         }
 
@@ -79,9 +79,9 @@ public class MessagePasser {
     //LogLevel level,
     private void sendToLogger( String msg) {
 		TimeStampMessage tsMesseage = new TimeStampMessage(localName, "logger", "log", msg);
-		tsMesseage.setTimeStamp(clock.getCurrentTimeStamp(localName));
+		tsMesseage.setTimeStamp(clockServ.getCurrentTimeStamp(localName));
 		//logger.log(tsMesseage);
-		String text= localName+": "+"\nmessage: "+msg+"\ntime: "+clock.getCurrentTimeStamp(localName).getVal();
+		String text= localName+": "+"\nmessage: "+msg+"\ntime: "+clockServ.getCurrentTimeStamp(localName).getVal();
 		logger.debug(text);
 	}
 
@@ -133,7 +133,7 @@ public class MessagePasser {
         // Set source and seq of the massage
         message.setSrc(localName);
         message.setSeqNum(curSeqNum++);
-        TimeStamp ts = clock.getNewTimeStamp(localName);// TODO keep
+        TimeStamp ts = clockServ.getNewTimeStamp(localName);// TODO keep
 		message.setTimeStamp(ts);
         // Check if the configuration file has been changed.
         String MD5 = ConfigParser.getMD5Checksum(configFile);
