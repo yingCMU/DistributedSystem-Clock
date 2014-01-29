@@ -1,7 +1,10 @@
-package distSysLab0;
+package DistSysLab0;
 
 import java.io.IOException;
 import java.net.UnknownHostException;
+
+import DistSysLab0.Comm.MessagePasser;
+import DistSysLab0.Comm.UserInputThread;
 
 public class Simulator {
 	static public UserInputThread uiThread;

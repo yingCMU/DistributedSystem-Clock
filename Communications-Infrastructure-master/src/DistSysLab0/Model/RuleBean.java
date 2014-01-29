@@ -1,6 +1,8 @@
-package distSysLab0;
+package DistSysLab0.Model;
 
 import org.apache.log4j.Logger;
+
+import DistSysLab0.Message.Message;
 
 public class RuleBean {
     static Logger logger = Logger.getLogger(RuleBean.class);

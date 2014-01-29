@@ -1,4 +1,4 @@
-package distSysLab0;
+package DistSysLab0.Comm;
 
 import java.io.BufferedInputStream;
 import java.io.IOException;
@@ -9,7 +9,9 @@ import java.util.concurrent.LinkedBlockingDeque;
 
 import org.apache.log4j.Logger;
 
-import distSysLab0.RuleBean.RuleAction;
+import DistSysLab0.Message.Message;
+import DistSysLab0.Model.RuleBean;
+import DistSysLab0.Model.RuleBean.RuleAction;
 
 public class ReceiverThread implements Runnable {
     private static Logger logger = Logger.getLogger(ReceiverThread.class);

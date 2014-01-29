@@ -6,20 +6,19 @@ import DistSysLab0.Message.TimeStampMessage;
 import DistSysLab0.Model.*;
 
 public abstract class ClockFactory {
-	private static final int LOGICAL_ID = 0;
-	private static final int VECTOR_ID = 1;
+	
 	
 	private static ClockService clock = null;
 	protected TimeStamp myTimeStamp;
 	
 	//TODO factory pattern ok???
-	public static ClockService getClock(int clockId, String localName,int numOfNode,HashMap<String,NodeBean> nodelist) {
-		switch (clockId) {
-		case LOGICAL_ID:
+	public static ClockService getClock(ClockType clockType, String localName,int numOfNode,HashMap<String,NodeBean> nodelist) {
+		switch (clockType) {
+		case LOGICAL:
 			if (clock == null) 
 				 clock = new LogicalClock(localName);
 			break;
-		case VECTOR_ID:
+		case VECTOR:
 			if (clock == null)
 				clock = new VectorClock(numOfNode,nodelist);
 			break;
@@ -28,8 +27,5 @@ public abstract class ClockFactory {
 		}
 		return clock;
 	}
-	//TODO: required because its to be overridden differently by the 2 different clocks
-	public abstract TimeStamp getNewTimeStamp(String localName);
-	public abstract TimeStamp getCurrentTimeStamp(String localName);
-	public abstract TimeStamp updateTimeStampOnReceive(String localName, TimeStampMessage Tsm);
+	
 }

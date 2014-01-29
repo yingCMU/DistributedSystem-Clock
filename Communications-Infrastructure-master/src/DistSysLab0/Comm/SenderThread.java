@@ -1,4 +1,4 @@
-package distSysLab0;
+package DistSysLab0.Comm;
 
 import java.io.BufferedOutputStream;
 import java.io.IOException;
@@ -9,6 +9,9 @@ import java.util.HashMap;
 import java.util.concurrent.LinkedBlockingDeque;
 
 import org.apache.log4j.Logger;
+
+import DistSysLab0.Message.Message;
+import DistSysLab0.Model.NodeBean;
 
 public class SenderThread implements Runnable {
     private static Logger logger = Logger.getLogger(SenderThread.class);

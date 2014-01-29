@@ -1,4 +1,4 @@
-package distSysLab0;
+package DistSysLab0.Comm;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -16,7 +16,11 @@ import java.util.Map;
 
 import org.yaml.snakeyaml.Yaml;
 
-import distSysLab0.RuleBean.RuleAction;
+import DistSysLab0.Model.NodeBean;
+import DistSysLab0.Model.RuleBean;
+import DistSysLab0.Model.RuleBean.RuleAction;
+
+//import distSysLab0.RuleBean.RuleAction;
 
 public class ConfigParser {
     public static int NUM_NODE;

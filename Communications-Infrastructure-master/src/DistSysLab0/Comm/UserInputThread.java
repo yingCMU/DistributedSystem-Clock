@@ -1,10 +1,12 @@
-package distSysLab0;
+package DistSysLab0.Comm;
 
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 
 import org.apache.log4j.Logger;
+
+import DistSysLab0.Message.Message;
 
 public class UserInputThread implements Runnable {
     private static Logger logger = Logger.getLogger(UserInputThread.class);

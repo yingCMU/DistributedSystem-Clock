@@ -1,4 +1,4 @@
-package ds.lab.bean;
+package DistSysLab0.Model;
 
 import java.io.Serializable;
 import java.util.ArrayList;

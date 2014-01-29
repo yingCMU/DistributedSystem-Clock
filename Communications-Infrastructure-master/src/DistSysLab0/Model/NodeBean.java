@@ -1,4 +1,4 @@
-package distSysLab0;
+package DistSysLab0.Model;
 
 import java.io.Serializable;
 

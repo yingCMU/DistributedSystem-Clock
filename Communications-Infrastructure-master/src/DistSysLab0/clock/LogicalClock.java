@@ -9,40 +9,36 @@ import DistSysLab0.Model.*;
 
 public class LogicalClock extends ClockService {
 
-	//private AtomicInteger currentTimeStamp=null;
-	private LogicalTimeStamp ts;
+	private AtomicInteger cur=null;
+	//pivate LogicalTimeStamp lts;
 	
-	//TODO constructor
+	//initialising the logical clock for the thread
 	public LogicalClock(String localName)
-	{
-		ts = new LogicalTimeStamp();
-		//initialising the logical clock for the thread
-		ts.getVector().put(localName, new AtomicInteger(-1));//Init timestamp of this thread with -1
-		ts.getVector().get(localName).incrementAndGet();//Start timestamp of this thread with 0
-		System.out.println("Logical clock started for "+localName+" with init value"+ts.getVector().get(localName).get());
+	{	
+		cur = new AtomicInteger(-1);
+		
+		System.out.println("Logical clock started for "+localName+" with init value"+cur.get());
 	}
 	
 	@Override
+	//used by local process
 	public LogicalTimeStamp getNewTimeStamp(String localName) {
-		// TODO Auto-generated method stub
-		ts.getVector().get(localName).incrementAndGet();
-		
-		return ts;
+		return new LogicalTimeStamp(cur.incrementAndGet());
 	}
 
 	@Override
 	public LogicalTimeStamp getCurrentTimeStamp(String localName){
-		return ts;
+		return new LogicalTimeStamp(cur.get());
 	}
 	
 	public LogicalTimeStamp updateTimeStampOnReceive(String localName, TimeStampMessage Tsm)
 	{
-		int selfTimeStamp=this.ts.getVector().get(localName).get();
-		int senderTimeStamp=((LogicalTimeStamp) Tsm.getTimeStamp()).getVector().get(Tsm.getSrc()).get();
-		int updateSelfTimeStamp=((selfTimeStamp>senderTimeStamp)?selfTimeStamp:senderTimeStamp)+1;
-		this.ts.getVector().get(localName).set(updateSelfTimeStamp);
-		System.err.println("Local time stamp on reception = "+this.ts.getVector().get(localName).get());
-		return this.ts;
+		int self=cur.get();
+		int msg= Tsm.getTimeStamp().getVal();
+		int update=(Math.max(self, msg))+1;
+		cur = new AtomicInteger(update);
+		System.err.println("Local clock time stamp updated on reception -> "+update);
+		return new LogicalTimeStamp(cur.incrementAndGet());
 	}
 
 	

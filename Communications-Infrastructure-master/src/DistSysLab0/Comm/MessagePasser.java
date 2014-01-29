@@ -1,4 +1,4 @@
-package distSysLab0;
+package DistSysLab0.Comm;
 
 import java.io.IOException;
 import java.net.InetAddress;
@@ -9,7 +9,9 @@ import java.util.concurrent.LinkedBlockingDeque;
 
 import org.apache.log4j.Logger;
 
-import distSysLab0.RuleBean.RuleAction;
+import DistSysLab0.Message.Message;
+import DistSysLab0.Model.*;
+import DistSysLab0.Model.RuleBean.RuleAction;
 
 public class MessagePasser {
     private static MessagePasser instance;
