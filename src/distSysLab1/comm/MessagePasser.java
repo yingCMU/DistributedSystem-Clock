@@ -9,9 +9,8 @@ import java.util.concurrent.LinkedBlockingDeque;
 
 import org.apache.log4j.Logger;
 
-import distSysLab1.clock.ClockFactory;
 import distSysLab1.clock.ClockService;
-import distSysLab1.clock.ClockType;
+import distSysLab1.clock.ClockService.ClockType;
 import distSysLab1.message.TimeStampMessage;
 import distSysLab1.model.NodeBean;
 import distSysLab1.model.RuleBean;
@@ -56,7 +55,7 @@ public class MessagePasser {
         sendRules = ConfigParser.readSendRules();
         recvRules = ConfigParser.readRecvRules();
         MD5Last = ConfigParser.getMD5Checksum(configFile);
-        clockServ = ClockFactory.getClock(clockType, localName, nodeList.size(), nodeList);
+        clockServ = ClockService.getClockSerivce(clockType, localName);
 		
         if(nodeList.get(localName) == null) {
             logger.error("The local name is incorrect.");
@@ -75,13 +74,13 @@ public class MessagePasser {
         logger.debug(this.toString());
     }
     
-    /*using messageparser to send log message*/
+    /*using message parser to send log message*/
     //LogLevel level,
-    private void sendToLogger( String msg) {
-		TimeStampMessage tsMesseage = new TimeStampMessage(localName, "logger", "log", msg);
-		tsMesseage.setTimeStamp(clockServ.getCurrentTimeStamp(localName));
+    private void sendToLogger(String msg) {
+		TimeStampMessage tsMesseage = new TimeStampMessage(localName, "logger", "log");
+		tsMesseage.setTimeStamp(clockServ.getCurTimeStamp());
 		//logger.log(tsMesseage);
-		String text= localName+": "+"\nmessage: "+msg+"\ntime: "+clockServ.getCurrentTimeStamp(localName).getVal();
+		String text= localName+": "+"\nmessage: "+msg+"\ntime: "+clockServ.getCurTimeStamp().getTimeStamp().toString();
 		logger.debug(text);
 	}
 
@@ -133,7 +132,7 @@ public class MessagePasser {
         // Set source and seq of the massage
         message.setSrc(localName);
         message.setSeqNum(curSeqNum++);
-        TimeStamp ts = clockServ.getNewTimeStamp(localName);// TODO keep
+        TimeStamp ts = clockServ.getCurTimeStamp();
 		message.setTimeStamp(ts);
         // Check if the configuration file has been changed.
         String MD5 = ConfigParser.getMD5Checksum(configFile);

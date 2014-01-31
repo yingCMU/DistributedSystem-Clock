@@ -8,12 +8,12 @@ public class Message implements Serializable {
     private static final long serialVersionUID = 1L;
     static Logger logger = Logger.getLogger(Message.class);
 
-    private int seqNum;
-    private String src;
-    private String dest;
-    private String kind;
-    private Object data;
-    private boolean duplicate;
+    protected int seqNum;
+    protected String src;
+    protected String dest;
+    protected String kind;
+    protected Object data;
+    protected boolean duplicate;
 
     /**
      * Constructor of message

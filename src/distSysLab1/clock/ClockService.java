@@ -1,13 +1,54 @@
 package distSysLab1.clock;
 
-import distSysLab1.message.TimeStampMessage;
 import distSysLab1.timeStamp.TimeStamp;
 
 public abstract class ClockService {
-	//factory pattern ok???
-	
-	//TODO: required because its to be overridden differently by the 2 different clocks
-	public abstract TimeStamp getNewTimeStamp(String localName);
-	public abstract TimeStamp getCurrentTimeStamp(String localName);
-	public abstract TimeStamp updateTimeStampOnReceive(String localName, TimeStampMessage Tsm);
+    protected static final int step = 1;
+    
+    public enum ClockType {
+        LOGICAL, VECTOR, NONE;
+    }
+
+    private static ClockService instance;
+    protected TimeStamp curTimeStamp;
+    protected String localName;
+
+    protected ClockService() {
+
+    };
+
+    public static ClockService getClockSerivce(ClockType type, String localName) {
+        if(instance != null) {
+            return instance;
+        }
+        
+        switch(type) {
+        case LOGICAL:
+            instance = new LogicalClockService();
+            instance.localName = localName;
+            return instance;
+        case VECTOR:
+            instance = new VectorClockService();
+            instance.localName = localName;
+            return instance;
+        default:
+            return null;
+        }
+    }
+    
+    public TimeStamp getCurTimeStamp() {
+        return this.curTimeStamp;
+    }
+
+    /**
+     * Update currentTimeStamp when send a message by using the step length. 
+     */
+    public abstract void updateTimeStampOnSend();
+
+    /**
+     * Update currentTimeStamp when receive a message by comparing to timestamp
+     * in the incoming message.
+     * @param ts
+     */
+    public abstract void updateTimeStampOnReceive(TimeStamp ts);
 }

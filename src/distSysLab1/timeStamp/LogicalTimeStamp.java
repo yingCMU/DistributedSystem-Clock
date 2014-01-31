@@ -1,37 +1,33 @@
 package distSysLab1.timeStamp;
 
-import java.util.HashMap;
-import java.util.Iterator;
 import java.util.concurrent.atomic.AtomicInteger;
 
-public class LogicalTimeStamp extends TimeStamp<LogicalTimeStamp> {
-	/**
-	 * 
-	 */
-	private static final long serialVersionUID = 3L;
-	private int val=-1;
-	public LogicalTimeStamp() {
-		}
-	public int getVal(){
-		return val;
-	}
+public class LogicalTimeStamp extends TimeStamp implements Comparable<LogicalTimeStamp> {
+    private static final long serialVersionUID = 1L;
+    
+    private AtomicInteger localTS;
 
-	public LogicalTimeStamp(int in) {
-		this.val = in;
-	}
+    public LogicalTimeStamp() {
+        localTS = new AtomicInteger(0);
+    }
 
+    @Override
+    public int compareTo(LogicalTimeStamp ts) {
+        return this.localTS.get() - ((AtomicInteger)ts.getTimeStamp()).get();
+    }
 
-
-	
-	@Override
-	public synchronized int compareTo(LogicalTimeStamp o) {
-		
-		return val-o.val;
-	}
-
-	@Override
-	public String toString() {
-		return "current timstamp value is "+val;
-	}
-
+    @Override
+    public AtomicInteger getTimeStamp() {
+        return this.localTS;
+    }
+    
+    @Override
+    public void setTimeStamp(Object ts) {
+        this.localTS = (AtomicInteger)ts;
+    }
+    
+    @Override
+    public String toString() {
+        return this.localTS.toString();
+    }
 }

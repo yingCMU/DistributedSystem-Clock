@@ -2,16 +2,11 @@ package distSysLab1.timeStamp;
 
 import java.io.Serializable;
 
-public abstract class TimeStamp<E> implements Comparable<E>, Serializable{
-	
-	/**
-	 * 
-	 */
-	private int val=-1;
-	private static final long serialVersionUID = 3L;
+public abstract class TimeStamp implements Serializable {
 
-	public TimeStamp(){}
-	public int getVal(){
-		return val;
-	}
+    private static final long serialVersionUID = 1L;
+
+    abstract public void setTimeStamp(Object o);
+    
+    abstract public Object getTimeStamp();
 }

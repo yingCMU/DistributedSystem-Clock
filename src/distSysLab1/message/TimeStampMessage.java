@@ -3,65 +3,39 @@ package distSysLab1.message;
 import distSysLab1.timeStamp.TimeStamp;
 
 public class TimeStampMessage extends Message {
-	/**
-	 * 
-	 */
 	private static final long serialVersionUID = 1L;
-	protected TimeStampMessage myDup = null;
 	
-	public TimeStampMessage(String src, String dest, String kind, Object data) {
-		super(src, dest, kind, data);
-	}
-
-	public TimeStampMessage(String dest, String kind, String data) {
-		super( dest, kind, data);
-	}
-
 	private TimeStamp timeStamp;
 
-	public TimeStamp getTimeStamp() {
-		return timeStamp;
+	public TimeStampMessage(String dest, String kind, Object data) {
+		super(dest, kind, data);
 	}
-
+	
 	public void setTimeStamp(TimeStamp timeStamp) {
 		this.timeStamp = timeStamp;
 	}
 	
+	public TimeStamp getTimeStamp() {
+        return this.timeStamp;
+    }
 	
 	@Override
-	public TimeStampMessage clone() throws CloneNotSupportedException {
-		TimeStampMessage msg = new TimeStampMessage(this.getSrc(), this.getDest(), getKind(), this.getData());
-		msg.setTimeStamp(this.getTimeStamp());
-		this.myDup = msg;
-		return msg;
-	}
-	
-	@Override
-	public int hashCode() {
-		final int prime = 31;
-		int result = 1;
-		result = prime * result + ((timeStamp == null) ? 0 : timeStamp.hashCode());
-		return result;
-	}
+    public TimeStampMessage copyOf() {
+	    TimeStampMessage to = new TimeStampMessage(this.dest, this.kind, this.data);
+        to.duplicate = this.duplicate;
+        to.seqNum = this.seqNum;
+        to.src = this.src;
+        to.timeStamp = this.timeStamp;
+        
+        return to;
+    }
 
-	@Override
-	public boolean equals(Object obj) {
-		if (this == obj)
-			return true;
-		if (obj == null)
-			return false;
-		if (getClass() != obj.getClass())
-			return false;
-		TimeStampMessage other = (TimeStampMessage) obj;
-		if (this.myDup != null)
-			return this.myDup == other;
-		else
-			return this.getSeqNum() == other.getSeqNum() && this.getSrc().equals(other.getSrc());//<src, id> unique
-	}
-
-	@Override
-	public String toString() {
-		return timeStamp + " |";
-	}
+    @Override
+    public String toString() {
+        return "From:" + this.getSrc() + " to:" + this.getDest() +
+               " Seq:" + this.getSeqNum() + " Kind:" + this.getKind()
+               + " Dup:" + this.getDuplicate() + "TimeStamp: " + this.getTimeStamp().toString()
+               + " Data:" + this.getData();
+    }
 
 }

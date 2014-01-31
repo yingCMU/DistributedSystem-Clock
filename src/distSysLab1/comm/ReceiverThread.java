@@ -12,7 +12,6 @@ import org.apache.log4j.Logger;
 import distSysLab1.message.TimeStampMessage;
 import distSysLab1.model.RuleBean;
 import distSysLab1.model.RuleBean.RuleAction;
-import distSysLab1.timeStamp.TimeStamp;
 import distSysLab1.clock.ClockService;
 
 public class ReceiverThread implements Runnable {
@@ -67,8 +66,8 @@ public class ReceiverThread implements Runnable {
                         }
                     }
                     synchronized (clock) {
-                    	clock.updateTimeStampOnReceive(message.getDest(), message);
-                    	logger.info("clock updated as "+clock.getCurrentTimeStamp(null).getVal());
+                    	clock.updateTimeStampOnReceive(message.getTimeStamp());
+                    	logger.info("clock updated as "+clock.getCurTimeStamp().getTimeStamp().toString());
                     	
                     }
                     synchronized(recvQueue) {
