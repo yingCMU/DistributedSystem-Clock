@@ -67,7 +67,7 @@ public class ReceiverThread implements Runnable {
                     }
                     synchronized (clock) {
                     	clock.updateTimeStampOnReceive(message.getTimeStamp());
-                    	logger.info("clock updated as "+clock.getCurTimeStamp().getTimeStamp().toString());
+                    	logger.info("clock updated as " + clock.getCurTimeStamp().getTimeStamp().toString());
                     	
                     }
                     synchronized(recvQueue) {

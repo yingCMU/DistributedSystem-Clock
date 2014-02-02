@@ -15,7 +15,6 @@ import distSysLab1.message.TimeStampMessage;
 import distSysLab1.model.NodeBean;
 import distSysLab1.model.RuleBean;
 import distSysLab1.model.RuleBean.RuleAction;
-import distSysLab1.timeStamp.TimeStamp;
 
 public class MessagePasser {
     private static MessagePasser instance;
@@ -132,8 +131,9 @@ public class MessagePasser {
         // Set source and seq of the massage
         message.setSrc(localName);
         message.setSeqNum(curSeqNum++);
-        TimeStamp ts = clockServ.getCurTimeStamp();
-		message.setTimeStamp(ts);
+        this.getClockServ().updateTimeStampOnSend();
+		message.setTimeStamp(clockServ.getCurTimeStamp());
+		
         // Check if the configuration file has been changed.
         String MD5 = ConfigParser.getMD5Checksum(configFile);
         if (!MD5.equals(MD5Last)) {

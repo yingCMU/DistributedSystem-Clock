@@ -33,8 +33,6 @@ public class VectorClockService extends ClockService {
             localMap.put(e.getKey(), new AtomicInteger(localVal < remoteVal ? remoteVal : localVal));
         }
         
-        
         localMap.put(localName, new AtomicInteger(localMap.get(localName).get() + step));
     }
-
 }
