@@ -4,10 +4,14 @@ import java.util.HashMap;
 import java.util.Map.Entry;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import distSysLab1.timeStamp.LogicalTimeStamp;
 import distSysLab1.timeStamp.TimeStamp;
 import distSysLab1.timeStamp.VectorTimeStamp;
 
 public class VectorClockService extends ClockService {
+    public VectorClockService(int nodeAmount) {
+        this.curTimeStamp = new VectorTimeStamp(nodeAmount);
+    }
 
     @Override
     public void updateTimeStampOnSend() {

@@ -17,18 +17,18 @@ public abstract class ClockService {
 
     };
 
-    public static ClockService getClockSerivce(ClockType type, String localName) {
+    public static ClockService getClockSerivce(ClockType type, String localName, int nodeAmount) {
         if(instance != null) {
             return instance;
         }
         
         switch(type) {
         case LOGICAL:
-            instance = new LogicalClockService();
+            instance = new LogicalClockService(nodeAmount);
             instance.localName = localName;
             return instance;
         case VECTOR:
-            instance = new VectorClockService();
+            instance = new VectorClockService(nodeAmount);
             instance.localName = localName;
             return instance;
         default:

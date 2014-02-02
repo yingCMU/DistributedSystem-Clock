@@ -33,8 +33,10 @@ public class UserInputThread implements Runnable {
                     String kind = in.readLine();
                     System.out.println("TimeStampMessage data:");
                     String data = in.readLine();
-
+                    
+                    msgPasser.getClockServ().updateTimeStampOnSend();
                     TimeStampMessage msg = new TimeStampMessage(dest, kind, data);
+                    msg.setTimeStamp(msgPasser.getClockServ().getCurTimeStamp());
                     msgPasser.send(msg);
                     
                     System.out.println("Send Success:");

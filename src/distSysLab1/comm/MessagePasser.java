@@ -20,7 +20,7 @@ import distSysLab1.timeStamp.TimeStamp;
 public class MessagePasser {
     private static MessagePasser instance;
     private static Logger logger = Logger.getLogger(MessagePasser.class);
-    private  ClockService clockServ;
+    private ClockService clockServ;
     private LinkedBlockingDeque<TimeStampMessage> sendQueue = new LinkedBlockingDeque<TimeStampMessage>();
     private LinkedBlockingDeque<TimeStampMessage> sendDelayQueue = new LinkedBlockingDeque<TimeStampMessage>();
     private LinkedBlockingDeque<TimeStampMessage> recvQueue = new LinkedBlockingDeque<TimeStampMessage>();
@@ -55,7 +55,7 @@ public class MessagePasser {
         sendRules = ConfigParser.readSendRules();
         recvRules = ConfigParser.readRecvRules();
         MD5Last = ConfigParser.getMD5Checksum(configFile);
-        clockServ = ClockService.getClockSerivce(clockType, localName);
+        clockServ = ClockService.getClockSerivce(clockType, localName, nodeList.size());
 		
         if(nodeList.get(localName) == null) {
             logger.error("The local name is incorrect.");
@@ -193,6 +193,11 @@ public class MessagePasser {
                 message = recvQueue.poll();
             }
         }
+        
+        if(message != null) {
+            clockServ.updateTimeStampOnReceive(message.getTimeStamp());
+        }
+        
         return message;
     }
 
@@ -207,6 +212,10 @@ public class MessagePasser {
 
     public HashMap<String, NodeBean> getNodeList() {
         return nodeList;
+    }
+    
+    public ClockService getClockServ() {
+        return clockServ;
     }
 
     @Override
