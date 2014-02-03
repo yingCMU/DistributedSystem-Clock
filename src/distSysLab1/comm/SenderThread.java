@@ -8,14 +8,10 @@ import java.net.Socket;
 import java.util.HashMap;
 import java.util.concurrent.LinkedBlockingDeque;
 
-import org.apache.log4j.Logger;
-
 import distSysLab1.message.TimeStampMessage;
 import distSysLab1.model.NodeBean;
 
 public class SenderThread implements Runnable {
-    private static Logger logger = Logger.getLogger(SenderThread.class);
-
     private LinkedBlockingDeque<TimeStampMessage> sendQueue;
     private HashMap<String, NodeBean> nodeList;
     private Socket socket;
@@ -45,8 +41,7 @@ public class SenderThread implements Runnable {
                     objectOutputStream.flush();
                 }
                 catch (ConnectException e) {
-                    logger.error("ERROR: TimeStampMessage send failure, node offline " + message.toString());
-                    System.out.println("ERROR: TimeStampMessage send failure, node offline " + message.toString());
+                    System.err.println("ERROR: TimeStampMessage send failure, node offline " + message.toString());
                 }
                 catch (IOException e) {
                     e.printStackTrace();

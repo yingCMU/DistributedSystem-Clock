@@ -1,11 +1,8 @@
 package distSysLab1.model;
 
-import org.apache.log4j.Logger;
-
 import distSysLab1.message.Message;
 
 public class RuleBean {
-    static Logger logger = Logger.getLogger(RuleBean.class);
 
     public enum RuleAction {
         DROP, DUPLICATE, DELAY, NONE;

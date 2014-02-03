@@ -7,8 +7,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.concurrent.LinkedBlockingDeque;
 
-import org.apache.log4j.Logger;
-
 import distSysLab1.clock.ClockService;
 import distSysLab1.clock.ClockService.ClockType;
 import distSysLab1.message.TimeStampMessage;
@@ -18,7 +16,6 @@ import distSysLab1.model.RuleBean.RuleAction;
 
 public class MessagePasser {
     private static MessagePasser instance;
-    private static Logger logger = Logger.getLogger(MessagePasser.class);
     private ClockService clockServ;
     private LinkedBlockingDeque<TimeStampMessage> sendQueue = new LinkedBlockingDeque<TimeStampMessage>();
     private LinkedBlockingDeque<TimeStampMessage> sendDelayQueue = new LinkedBlockingDeque<TimeStampMessage>();
@@ -30,12 +27,13 @@ public class MessagePasser {
 
     private String configFile;
     private String localName;
+    private String loggerName;
     private String MD5Last;
     private int curSeqNum;
 
     private ListenerThread listener;
     private SenderThread sender;
-	private ClockType clockType = ClockType.LOGICAL;
+	private ClockType clockType;
 
     /**
      * Actual constructor for MessagePasser
@@ -43,25 +41,35 @@ public class MessagePasser {
      * @param configFile
      * @param localName
      */
-    private MessagePasser(String configFile, String localName)
+    private MessagePasser(String configFile, String localName, String loggerName)
             throws UnknownHostException {
+        this.loggerName = loggerName;
         this.localName = localName;
         this.configFile = configFile;
         this.curSeqNum = 0;
 
         ConfigParser.configurationFile = configFile;
+        String type = ConfigParser.readClock();
         nodeList = ConfigParser.readConfig();
         sendRules = ConfigParser.readSendRules();
         recvRules = ConfigParser.readRecvRules();
         MD5Last = ConfigParser.getMD5Checksum(configFile);
-        clockServ = ClockService.getClockSerivce(clockType, localName, nodeList.size());
+        
+        if(type.equalsIgnoreCase("VECTOR")) {
+            clockType = ClockType.VECTOR;
+        }
+        else if(type.equalsIgnoreCase("LOGICAL")) {
+            clockType = ClockType.LOGICAL;
+        }
+        
+        clockServ = ClockService.getClockSerivce(clockType, localName, nodeList);
 		
         if(nodeList.get(localName) == null) {
-            logger.error("The local name is incorrect.");
+            System.err.println("The local name is incorrect.");
             System.exit(0);
         }
         else if (!InetAddress.getLocalHost().getHostAddress().toString().equals(nodeList.get(localName).getIp())) {
-            logger.error("Local ip do not match configuration file.");
+            System.err.println("Local ip do not match configuration file.");
             System.exit(0);
         }
         else {
@@ -70,17 +78,23 @@ public class MessagePasser {
             sender = new SenderThread(sendQueue, sendDelayQueue, nodeList);
         }
 
-        logger.debug(this.toString());
+        System.out.println("Local status is: " + this.toString());
     }
     
-    /*using message parser to send log message*/
-    //LogLevel level,
-    private void sendToLogger(String msg) {
-		TimeStampMessage tsMesseage = new TimeStampMessage(localName, "logger", "log");
-		tsMesseage.setTimeStamp(clockServ.getCurTimeStamp());
-		//logger.log(tsMesseage);
-		String text= localName+": "+"\nmessage: "+msg+"\ntime: "+clockServ.getCurTimeStamp().getTimeStamp().toString();
-		logger.debug(text);
+    private void sendToLogger(TimeStampMessage msg, String info, boolean willLog) {
+        if(willLog == true) {
+            if(nodeList.get(loggerName) == null) {
+                System.err.println("You have not assigned a valid logger.");
+                return;
+            }
+            
+            TimeStampMessage wrapper = new TimeStampMessage(loggerName, info, msg);
+            wrapper.setSrc(localName);
+            wrapper.setSeqNum(curSeqNum++);
+            wrapper.setTimeStamp(msg.getTimeStamp());
+            
+            sendQueue.add(wrapper);
+        }
 	}
 
     /**
@@ -105,10 +119,11 @@ public class MessagePasser {
      * @param configuration_filename
      * @param local_name
      */
-    public static synchronized MessagePasser getInstance(String configuration_filename, String local_name)
-                                                                 throws UnknownHostException {
+    public static synchronized MessagePasser getInstance(String configFileName,
+                                                         String localName, String loggerName)
+                                                         throws UnknownHostException {
         if (instance == null) {
-            instance = new MessagePasser(configuration_filename, local_name);
+            instance = new MessagePasser(configFileName, localName, loggerName);
         }
         return instance;
     }
@@ -127,7 +142,7 @@ public class MessagePasser {
      *
      * @param message The message need to be sent.
      */
-    public void send(TimeStampMessage message) {
+    public void send(TimeStampMessage message, boolean willLog) {
         // Set source and seq of the massage
         message.setSrc(localName);
         message.setSeqNum(curSeqNum++);
@@ -154,15 +169,18 @@ public class MessagePasser {
         switch (action) {
         case DROP:
             // Just drop this message.
+            sendToLogger(message, "Sender dropped.", willLog);
             break;
 
         case DUPLICATE:
             // Add this message into sendQueue.
             sendQueue.add(message);
+            sendToLogger(message, "Sender accepted.", willLog);
             // Add a duplicate message into sendQueue.
             TimeStampMessage copy = (TimeStampMessage) message.copyOf();
             copy.setDuplicate(true);
             sendQueue.add(copy);
+            sendToLogger(copy, "Sender duplicated.", willLog);
             sendQueue.addAll(sendDelayQueue);
             sendDelayQueue.clear();
             break;
@@ -170,12 +188,14 @@ public class MessagePasser {
         case DELAY:
             // Add this message into delayQueue
             sendDelayQueue.add(message);
+            sendToLogger(message, "Sender delayed.", willLog);
             break;
 
         case NONE:
         default:
             // Add this message into sendQueue
             sendQueue.add(message);
+            sendToLogger(message, "Sender accepted.", willLog);
             sendQueue.addAll(sendDelayQueue);
             sendDelayQueue.clear();
         }
@@ -183,10 +203,11 @@ public class MessagePasser {
 
     /**
      * Deliver message from the receive queue
+     * @param willLog 
      *
      * @return A message
      */
-    public TimeStampMessage receive() {
+    public TimeStampMessage receive(Boolean willLog) {
         TimeStampMessage message = null;
         synchronized (recvQueue) {
             if (!recvQueue.isEmpty()) {
@@ -196,6 +217,7 @@ public class MessagePasser {
         
         if(message != null) {
             clockServ.updateTimeStampOnReceive(message.getTimeStamp());
+            sendToLogger(message, "Receive accepted.", willLog);
         }
         
         return message;

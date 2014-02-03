@@ -19,11 +19,11 @@ public class LogicalClockService extends ClockService {
 
     @Override
     public void updateTimeStampOnReceive(TimeStamp ts) {
-        LogicalTimeStamp localTS = (LogicalTimeStamp)this.getCurTimeStamp();
-        LogicalTimeStamp remoteTS = (LogicalTimeStamp)ts.getTimeStamp();
+        AtomicInteger localTS = (AtomicInteger)this.getCurTimeStamp().getTimeStamp();
+        AtomicInteger remoteTS = (AtomicInteger)ts.getTimeStamp();
 
-        int localVal = localTS.getTimeStamp().get();
-        int remoteVal = remoteTS.getTimeStamp().get();
+        int localVal = localTS.get();
+        int remoteVal = remoteTS.get();
         
         AtomicInteger newVal = new AtomicInteger(Math.max(localVal, remoteVal) + 1);
         this.curTimeStamp.setTimeStamp(newVal);

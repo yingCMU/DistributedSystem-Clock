@@ -1,5 +1,10 @@
 package distSysLab1.clock;
 
+import java.util.HashMap;
+import java.util.Map.Entry;
+import java.util.concurrent.atomic.AtomicInteger;
+
+import distSysLab1.model.NodeBean;
 import distSysLab1.timeStamp.TimeStamp;
 
 public abstract class ClockService {
@@ -17,19 +22,26 @@ public abstract class ClockService {
 
     };
 
-    public static ClockService getClockSerivce(ClockType type, String localName, int nodeAmount) {
+    public static ClockService getClockSerivce(ClockType type, String localName,
+                                               HashMap<String, NodeBean> nodeList) {
         if(instance != null) {
             return instance;
         }
         
         switch(type) {
         case LOGICAL:
-            instance = new LogicalClockService(nodeAmount);
+            instance = new LogicalClockService(nodeList.size());
             instance.localName = localName;
             return instance;
         case VECTOR:
-            instance = new VectorClockService(nodeAmount);
+            instance = new VectorClockService(nodeList.size());
             instance.localName = localName;
+            HashMap<String, AtomicInteger> map = (HashMap<String, AtomicInteger>) instance.getCurTimeStamp().getTimeStamp();
+            
+            for(Entry<String, NodeBean> cur : nodeList.entrySet()) {
+                map.put(cur.getKey(), new AtomicInteger(0));
+            }
+            
             return instance;
         default:
             return null;

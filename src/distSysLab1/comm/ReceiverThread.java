@@ -7,16 +7,12 @@ import java.net.Socket;
 import java.util.ArrayList;
 import java.util.concurrent.LinkedBlockingDeque;
 
-import org.apache.log4j.Logger;
-
 import distSysLab1.message.TimeStampMessage;
 import distSysLab1.model.RuleBean;
 import distSysLab1.model.RuleBean.RuleAction;
 import distSysLab1.clock.ClockService;
 
 public class ReceiverThread implements Runnable {
-    private static Logger logger = Logger.getLogger(ReceiverThread.class);
-
     private Socket socket;
     private ObjectInputStream in;
     private ArrayList<RuleBean> recvRules;
@@ -27,18 +23,18 @@ public class ReceiverThread implements Runnable {
     private String configFile;
     private String MD5Last;
 
-    public ReceiverThread(Socket socket, String configFile,
+    public ReceiverThread(Socket socket, String configFile, ClockService clock,
                             ArrayList<RuleBean> recvRules, ArrayList<RuleBean> sendRules,
                             LinkedBlockingDeque<TimeStampMessage> recvQueue,
-                            LinkedBlockingDeque<TimeStampMessage> recvDelayQueue,ClockService clock) {
+                            LinkedBlockingDeque<TimeStampMessage> recvDelayQueue) {
         this.socket = socket;
         this.recvQueue = recvQueue;
         this.in = null;
         this.clock = clock;
         this.recvDelayQueue = recvDelayQueue;
         this.recvRules = recvRules;
-        this.configFile = configFile;
         this.sendRules = sendRules;
+        this.configFile = configFile;
         MD5Last = "";
     }
 
@@ -58,7 +54,6 @@ public class ReceiverThread implements Runnable {
                 if((message = (TimeStampMessage) (in.readObject())) != null) {
                     // Try to match a rule and act corresponding
                     // The match procedure should be in the listener thread
-                    logger.info((String) message.getData());
                     RuleAction action = RuleAction.NONE;
                     for (RuleBean rule : recvRules) {
                         if (rule.isMatch(message)) {
@@ -67,8 +62,6 @@ public class ReceiverThread implements Runnable {
                     }
                     synchronized (clock) {
                     	clock.updateTimeStampOnReceive(message.getTimeStamp());
-                    	logger.info("clock updated as " + clock.getCurTimeStamp().getTimeStamp().toString());
-                    	
                     }
                     synchronized(recvQueue) {
                         // Do action according to the matched rule's type.

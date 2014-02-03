@@ -23,6 +23,26 @@ import distSysLab1.model.RuleBean.RuleAction;
 public class ConfigParser {
     public static int NUM_NODE;
     public static String configurationFile;
+    
+    /**
+     * Read clock type part in config file.
+     */
+    public static String readClock() throws UnknownHostException {
+        String clockType = null;
+        Map<String, ArrayList<Map<String, Object>>> obj = init();
+
+        for(Map.Entry<String, ArrayList<Map<String, Object>>> entrys : obj.entrySet()) {
+            Iterator<Map<String, Object>> i = entrys.getValue().iterator();
+            while(i.hasNext()) {
+                Map<String, Object> node = (Map<String, Object>) i.next();
+                for(Map.Entry<String, Object> entry : node.entrySet()) {
+                    if(entry.getKey().equalsIgnoreCase("Type"))
+                        clockType = entry.getValue().toString();
+                }
+            }
+        }
+        return clockType;
+    }
 
     /**
      * Read configuration part in config file.
@@ -47,6 +67,7 @@ public class ConfigParser {
                 nodeList.put(bean.getName(), bean);
             }
         }
+        nodeList.remove(null);
         return nodeList;
     }
 

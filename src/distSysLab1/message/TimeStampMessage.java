@@ -1,8 +1,10 @@
 package distSysLab1.message;
 
+import distSysLab1.timeStamp.LogicalTimeStamp;
 import distSysLab1.timeStamp.TimeStamp;
+import distSysLab1.timeStamp.VectorTimeStamp;
 
-public class TimeStampMessage extends Message {
+public class TimeStampMessage extends Message implements Comparable<TimeStampMessage>{
 	private static final long serialVersionUID = 1L;
 	
 	private TimeStamp timeStamp;
@@ -29,13 +31,24 @@ public class TimeStampMessage extends Message {
         
         return to;
     }
+	
+	@Override
+    public int compareTo(TimeStampMessage o) {
+	    TimeStamp stamp = o.getTimeStamp();
+        if (stamp instanceof LogicalTimeStamp) {
+            return ((LogicalTimeStamp)this.timeStamp).compareTo((LogicalTimeStamp)stamp);
+        } else if (stamp instanceof VectorTimeStamp) {
+            return ((VectorTimeStamp)this.timeStamp).compareTo((VectorTimeStamp)stamp);
+        }
+        
+        return 0;
+    }
 
     @Override
     public String toString() {
         return "From:" + this.getSrc() + " to:" + this.getDest() +
                " Seq:" + this.getSeqNum() + " Kind:" + this.getKind()
-               + " Dup:" + this.getDuplicate() + "TimeStamp: " + this.getTimeStamp().toString()
-               + " Data:" + this.getData();
+               + " Dup:" + this.getDuplicate() + " TimeStamp: " + this.getTimeStamp().toString()
+               + " [Data:" + this.getData() + " ]";
     }
-
 }

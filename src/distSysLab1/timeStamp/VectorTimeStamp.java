@@ -53,12 +53,6 @@ public class VectorTimeStamp extends TimeStamp implements Comparable<VectorTimeS
 
     @Override
     public String toString() {
-        StringBuffer sb = new StringBuffer();
-
-        for(Entry<String, AtomicInteger> e : localTS.entrySet()) {
-            sb.append(e.getKey() + "-" + e.getValue() + "\n");
-        }
-
-        return sb.toString();
+        return localTS.toString();
     }
 }

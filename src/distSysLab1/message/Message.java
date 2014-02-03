@@ -2,12 +2,9 @@ package distSysLab1.message;
 
 import java.io.Serializable;
 
-import org.apache.log4j.Logger;
-
 public class Message implements Serializable {
     private static final long serialVersionUID = 1L;
-    static Logger logger = Logger.getLogger(Message.class);
-
+    
     protected int seqNum;
     protected String src;
     protected String dest;
