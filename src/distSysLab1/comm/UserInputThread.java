@@ -35,14 +35,14 @@ public class UserInputThread implements Runnable {
 
                     TimeStampMessage msg = new TimeStampMessage(dest, kind, data);
                     msgPasser.send(msg, willLog);
-                    
+
                     System.out.println("Send Success:");
                     System.out.println(msg.toString());
                 }
                 else if(command.equals("receive")) {
                     System.out.println("Do you want it to be logged (true/false):");
                     Boolean willLog = (new Boolean(in.readLine())).booleanValue();
-                    
+
                     TimeStampMessage msg = msgPasser.receive(willLog);
                     if(msg == null) {
                         System.out.println("Nothing received.");
@@ -86,28 +86,28 @@ public class UserInputThread implements Runnable {
 
         System.out.println("Enter the name of your machine:");
         result[1] = in.readLine();
-        
+
         System.out.println("Enter the name of logger:");
-        System.out.println("(You can skip this step, but cannot use logger function anymore)");
+        System.out.println("(You may skip this step, but cannot use logger function anymore)");
         result[2] = in.readLine();
 
         return result;
     }
-    
+
     public static void main(String[] args) throws IOException {
         try {
             String[] arg = init();
-            MessagePasser messagePasser = MessagePasser.getInstance(arg[0], arg[1], arg[2]);    
+            MessagePasser messagePasser = MessagePasser.getInstance(arg[0], arg[1], arg[2]);
             messagePasser.startListener();
-            messagePasser.startSender();       
-            
+            messagePasser.startSender();
+
             UserInputThread uiThread = new UserInputThread();
-            Thread thread = new Thread(uiThread); 
+            Thread thread = new Thread(uiThread);
             thread.start();
-            //messagePasser.teminate();         
-                
-        } catch (UnknownHostException e) { 
+            //messagePasser.teminate();
+
+        } catch (UnknownHostException e) {
             e.printStackTrace();
-        }       
+        }
     }
 }

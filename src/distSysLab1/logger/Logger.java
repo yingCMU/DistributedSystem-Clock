@@ -13,11 +13,8 @@ import distSysLab1.model.NodeBean;
 
 public class Logger {
     private static Logger instance;
-    
-    // node and rules
-    private HashMap<String, NodeBean> nodeList = new HashMap<String, NodeBean>();
 
-    // queue and other data structure useful in communication
+    private HashMap<String, NodeBean> nodeList = new HashMap<String, NodeBean>();
     private LinkedBlockingDeque<TimeStampMessage> recvQueue = new LinkedBlockingDeque<TimeStampMessage>();
     private ArrayList<TimeStampMessage> logList = new ArrayList<TimeStampMessage>();
     private String localName;
@@ -39,11 +36,11 @@ public class Logger {
         }
         else {
             startListener();
-            
+
             startUIThread();
         }
     }
-    
+
     public static Logger getInstance(String configFile, String localName) throws UnknownHostException {
         if (instance == null) {
             instance = new Logger(configFile, localName);
@@ -68,7 +65,7 @@ public class Logger {
         Thread thread = new Thread(new LoggerListenerThread(port));
         thread.start();
     }
-    
+
     /**
      * Initialization for UI thread.
      */
@@ -80,7 +77,7 @@ public class Logger {
 
     /**
      * Deliver message from the receive queue
-     * 
+     *
      * @return A message
      */
     public TimeStampMessage receive() {
@@ -96,7 +93,7 @@ public class Logger {
 
     /**
      * Show all the message that has been received.
-     * 
+     *
      * @return ArrayList<TimeStampMessage>
      */
     public ArrayList<TimeStampMessage> showMessages() {

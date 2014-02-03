@@ -23,7 +23,7 @@ import distSysLab1.model.RuleBean.RuleAction;
 public class ConfigParser {
     public static int NUM_NODE;
     public static String configurationFile;
-    
+
     /**
      * Read clock type part in config file.
      */

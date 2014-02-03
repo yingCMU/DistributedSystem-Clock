@@ -5,42 +5,43 @@ import distSysLab1.timeStamp.TimeStamp;
 import distSysLab1.timeStamp.VectorTimeStamp;
 
 public class TimeStampMessage extends Message implements Comparable<TimeStampMessage>{
-	private static final long serialVersionUID = 1L;
-	
-	private TimeStamp timeStamp;
+    private static final long serialVersionUID = 1L;
 
-	public TimeStampMessage(String dest, String kind, Object data) {
-		super(dest, kind, data);
-	}
-	
-	public void setTimeStamp(TimeStamp timeStamp) {
-		this.timeStamp = timeStamp;
-	}
-	
-	public TimeStamp getTimeStamp() {
+    private TimeStamp timeStamp;
+
+    public TimeStampMessage(String dest, String kind, Object data) {
+        super(dest, kind, data);
+    }
+
+    public void setTimeStamp(TimeStamp timeStamp) {
+        this.timeStamp = timeStamp;
+    }
+
+    public TimeStamp getTimeStamp() {
         return this.timeStamp;
     }
-	
-	@Override
+
+    @Override
     public TimeStampMessage copyOf() {
-	    TimeStampMessage to = new TimeStampMessage(this.dest, this.kind, this.data);
+        TimeStampMessage to = new TimeStampMessage(this.dest, this.kind, this.data);
         to.duplicate = this.duplicate;
         to.seqNum = this.seqNum;
         to.src = this.src;
         to.timeStamp = this.timeStamp;
-        
+
         return to;
     }
-	
-	@Override
+
+    @Override
     public int compareTo(TimeStampMessage o) {
-	    TimeStamp stamp = o.getTimeStamp();
+        TimeStamp stamp = o.getTimeStamp();
         if (stamp instanceof LogicalTimeStamp) {
             return ((LogicalTimeStamp)this.timeStamp).compareTo((LogicalTimeStamp)stamp);
-        } else if (stamp instanceof VectorTimeStamp) {
+        }
+        else if (stamp instanceof VectorTimeStamp) {
             return ((VectorTimeStamp)this.timeStamp).compareTo((VectorTimeStamp)stamp);
         }
-        
+
         return 0;
     }
 

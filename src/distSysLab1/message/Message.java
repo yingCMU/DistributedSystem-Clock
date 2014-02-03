@@ -4,7 +4,7 @@ import java.io.Serializable;
 
 public class Message implements Serializable {
     private static final long serialVersionUID = 1L;
-    
+
     protected int seqNum;
     protected String src;
     protected String dest;
@@ -27,14 +27,14 @@ public class Message implements Serializable {
     }
 
     public Message(String src, String dest, String kind, Object data) {
-    	this.src = src;
-    	this.dest = dest;
+        this.src = src;
+        this.dest = dest;
         this.kind = kind;
         this.data = data;
         this.duplicate = false;
-	}
+    }
 
-	public int getSeqNum() {
+    public int getSeqNum() {
         return seqNum;
     }
 

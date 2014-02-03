@@ -9,7 +9,7 @@ public class LogicalClockService extends ClockService {
     public LogicalClockService(int nodeAmount) {
         this.curTimeStamp = new LogicalTimeStamp();
     }
-    
+
     @Override
     public void updateTimeStampOnSend() {
         AtomicInteger cur = (AtomicInteger)this.getCurTimeStamp().getTimeStamp();
@@ -24,7 +24,8 @@ public class LogicalClockService extends ClockService {
 
         int localVal = localTS.get();
         int remoteVal = remoteTS.get();
-        
+
+        // Update is based on a "max plus one" manner
         AtomicInteger newVal = new AtomicInteger(Math.max(localVal, remoteVal) + 1);
         this.curTimeStamp.setTimeStamp(newVal);
     }

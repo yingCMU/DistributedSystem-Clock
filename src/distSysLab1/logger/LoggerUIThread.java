@@ -7,7 +7,7 @@ import java.util.ArrayList;
 
 import distSysLab1.message.TimeStampMessage;
 
-public class LoggerUIThread implements Runnable {    
+public class LoggerUIThread implements Runnable {
     ArrayList<TimeStampMessage> list = new ArrayList<TimeStampMessage>();
 
     @Override

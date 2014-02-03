@@ -9,7 +9,7 @@ import distSysLab1.timeStamp.TimeStamp;
 
 public abstract class ClockService {
     protected static final int step = 1;
-    
+
     public enum ClockType {
         LOGICAL, VECTOR, NONE;
     }
@@ -27,7 +27,7 @@ public abstract class ClockService {
         if(instance != null) {
             return instance;
         }
-        
+
         switch(type) {
         case LOGICAL:
             instance = new LogicalClockService(nodeList.size());
@@ -37,23 +37,23 @@ public abstract class ClockService {
             instance = new VectorClockService(nodeList.size());
             instance.localName = localName;
             HashMap<String, AtomicInteger> map = (HashMap<String, AtomicInteger>) instance.getCurTimeStamp().getTimeStamp();
-            
+            // Vector time stamp need initialization
             for(Entry<String, NodeBean> cur : nodeList.entrySet()) {
                 map.put(cur.getKey(), new AtomicInteger(0));
             }
-            
+
             return instance;
         default:
             return null;
         }
     }
-    
+
     public TimeStamp getCurTimeStamp() {
         return this.curTimeStamp;
     }
 
     /**
-     * Update currentTimeStamp when send a message by using the step length. 
+     * Update currentTimeStamp when send a message by using the step length.
      */
     public abstract void updateTimeStampOnSend();
 

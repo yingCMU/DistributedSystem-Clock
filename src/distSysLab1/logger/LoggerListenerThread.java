@@ -20,7 +20,6 @@ public class LoggerListenerThread implements Runnable {
             while(true) {
                 // Listening for new incoming connection.
                 Socket socket = listenSocket.accept();
-                //logger.info("Handling client at " + socket.getRemoteSocketAddress());
 
                 // Create a new thread for new incoming connection.
                 thread = new Thread(new LoggerReceiverThread(socket));
@@ -28,7 +27,6 @@ public class LoggerListenerThread implements Runnable {
             }
         }
         catch (IOException e) {
-            //logger.error("ERROR: Server socket error");
             System.err.println("ERROR: server Socket error");
         }
     }

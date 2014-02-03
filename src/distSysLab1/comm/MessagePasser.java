@@ -33,7 +33,7 @@ public class MessagePasser {
 
     private ListenerThread listener;
     private SenderThread sender;
-	private ClockType clockType;
+    private ClockType clockType;
 
     /**
      * Actual constructor for MessagePasser
@@ -54,16 +54,16 @@ public class MessagePasser {
         sendRules = ConfigParser.readSendRules();
         recvRules = ConfigParser.readRecvRules();
         MD5Last = ConfigParser.getMD5Checksum(configFile);
-        
+
         if(type.equalsIgnoreCase("VECTOR")) {
             clockType = ClockType.VECTOR;
         }
         else if(type.equalsIgnoreCase("LOGICAL")) {
             clockType = ClockType.LOGICAL;
         }
-        
+
         clockServ = ClockService.getClockSerivce(clockType, localName, nodeList);
-		
+
         if(nodeList.get(localName) == null) {
             System.err.println("The local name is incorrect.");
             System.exit(0);
@@ -80,22 +80,29 @@ public class MessagePasser {
 
         System.out.println("Local status is: " + this.toString());
     }
-    
+
+    /**
+     * For message that need to be logged, send it to the logger.
+     * @param msg
+     * @param info
+     * @param willLog
+     */
     private void sendToLogger(TimeStampMessage msg, String info, boolean willLog) {
         if(willLog == true) {
             if(nodeList.get(loggerName) == null) {
                 System.err.println("You have not assigned a valid logger.");
                 return;
             }
-            
+
+            // Build a wrapper message to make the original message as its data field.
             TimeStampMessage wrapper = new TimeStampMessage(loggerName, info, msg);
             wrapper.setSrc(localName);
             wrapper.setSeqNum(curSeqNum++);
             wrapper.setTimeStamp(msg.getTimeStamp());
-            
+
             sendQueue.add(wrapper);
         }
-	}
+    }
 
     /**
      * Initialization for receive thread.
@@ -147,8 +154,8 @@ public class MessagePasser {
         message.setSrc(localName);
         message.setSeqNum(curSeqNum++);
         this.getClockServ().updateTimeStampOnSend();
-		message.setTimeStamp(clockServ.getCurTimeStamp());
-		
+        message.setTimeStamp(clockServ.getCurTimeStamp());
+
         // Check if the configuration file has been changed.
         String MD5 = ConfigParser.getMD5Checksum(configFile);
         if (!MD5.equals(MD5Last)) {
@@ -203,7 +210,7 @@ public class MessagePasser {
 
     /**
      * Deliver message from the receive queue
-     * @param willLog 
+     * @param willLog
      *
      * @return A message
      */
@@ -214,12 +221,12 @@ public class MessagePasser {
                 message = recvQueue.poll();
             }
         }
-        
+
         if(message != null) {
             clockServ.updateTimeStampOnReceive(message.getTimeStamp());
             sendToLogger(message, "Receive accepted.", willLog);
         }
-        
+
         return message;
     }
 
@@ -235,7 +242,7 @@ public class MessagePasser {
     public HashMap<String, NodeBean> getNodeList() {
         return nodeList;
     }
-    
+
     public ClockService getClockServ() {
         return clockServ;
     }

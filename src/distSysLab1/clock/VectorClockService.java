@@ -24,14 +24,14 @@ public class VectorClockService extends ClockService {
         VectorTimeStamp remote = (VectorTimeStamp) ts;
         HashMap<String, AtomicInteger> localMap = local.getTimeStamp();
         HashMap<String, AtomicInteger> remoteMap = remote.getTimeStamp();
-        
+
         for(Entry<String, AtomicInteger> e : localMap.entrySet()) {
             int localVal = e.getValue().get();
             int remoteVal = remoteMap.get(e.getKey()).get();
-            
+            // Update each value in the vector by a "max plus one" manner.
             localMap.put(e.getKey(), new AtomicInteger(localVal < remoteVal ? remoteVal : localVal));
         }
-        
+
         localMap.put(localName, new AtomicInteger(localMap.get(localName).get() + step));
     }
 }

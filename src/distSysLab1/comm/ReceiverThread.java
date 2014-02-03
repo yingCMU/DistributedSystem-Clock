@@ -17,7 +17,7 @@ public class ReceiverThread implements Runnable {
     private ObjectInputStream in;
     private ArrayList<RuleBean> recvRules;
     private ArrayList<RuleBean> sendRules;
-	private ClockService clock;
+    private ClockService clock;
     private LinkedBlockingDeque<TimeStampMessage> recvQueue;
     private LinkedBlockingDeque<TimeStampMessage> recvDelayQueue;
     private String configFile;
@@ -60,8 +60,10 @@ public class ReceiverThread implements Runnable {
                             action = rule.getAction();
                         }
                     }
+
+                    // Update local time stamp when there is new incoming message.
                     synchronized (clock) {
-                    	clock.updateTimeStampOnReceive(message.getTimeStamp());
+                        clock.updateTimeStampOnReceive(message.getTimeStamp());
                     }
                     synchronized(recvQueue) {
                         // Do action according to the matched rule's type.

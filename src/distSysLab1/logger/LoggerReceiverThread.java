@@ -26,8 +26,7 @@ public class LoggerReceiverThread implements Runnable {
             }
         }
         catch (Exception e) {
-            //logger.error("ERROR: PairListenThread corrupt");
-            e.printStackTrace();
+            System.err.println("ERROR: LoggerReceiverThread error");
         }
     }
 }
