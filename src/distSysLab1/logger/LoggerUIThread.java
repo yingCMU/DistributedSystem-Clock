@@ -21,24 +21,37 @@ public class LoggerUIThread implements Runnable {
 
                 if(command.equals("print")) {
                     list = (ArrayList<TimeStampMessage>) Logger.getInstance().showMessages();
+                    
+                    if(list.size() > 0) {
+                        for(int i = 0; i < list.size() - 1; i++) {
+                            System.out.println(list.get(i).getData());
 
-                    for(int i = 0; i < list.size() - 1; i++) {
-                        System.out.println(list.get(i).getData());
-
-                        if(list.get(i).compareTo(list.get(i + 1)) == 0) {
-                            System.out.println("||");
+                            if(list.get(i).compareTo(list.get(i + 1)) == 0) {
+                                System.out.println("||");
+                            }
+                            else {
+                                System.out.println("->");
+                            }
                         }
-                        else {
-                            System.out.println("->");
-                        }
+                        
+                        System.out.println(list.get(list.size() - 1).getData());
                     }
-
-                    System.out.println(list.get(list.size() - 1).getData());
+                    else {
+                        System.out.println("No log.");
+                    } 
                 }
                 else if(command.equals("flush")) {
                     Logger.getInstance().showMessages().clear();
                     System.out.println("Log cleared.");
                 }
+                else if(command.equals("exit")) {
+                    break;
+                }
+                else {
+                    System.out.println("Invalid command. Try again.");
+                }
+                
+                System.out.println("Enter command: (print/flush/exit)");
             }
 
             System.out.println("Exit.");

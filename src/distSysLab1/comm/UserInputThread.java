@@ -13,7 +13,7 @@ public class UserInputThread implements Runnable {
         MessagePasser msgPasser = MessagePasser.getInstance();
 
         try {
-            System.out.println("Enter command: (send/receive/status/exit)");
+            System.out.println("Enter command: (send/receive/status/time/exit)");
             BufferedReader in = new BufferedReader(new InputStreamReader(System.in));
             String command = "";
             while(!command.equals("quit")) {
@@ -55,16 +55,19 @@ public class UserInputThread implements Runnable {
                 else if(command.equals("status")) {
                     System.out.println(msgPasser.toString());
                 }
+                else if(command.equals("time")) {
+                    System.out.println(msgPasser.getClockServ().getCurTimeStamp());
+                }
                 else if(command.equals("exit")) {
                     //msgPasser.teminate();
                     System.out.println("Exit.");
                     System.exit(0);
                 }
                 else {
-                    System.out.println("Invalid command");
+                    System.out.println("Invalid command. Try again.");
                 }
 
-                System.out.println("Enter command: (send/receive/status/exit)");
+                System.out.println("Enter command: (send/receive/status/time/exit)");
             }
 
             msgPasser.teminate();

@@ -223,7 +223,6 @@ public class MessagePasser {
         }
 
         if(message != null) {
-            clockServ.updateTimeStampOnReceive(message.getTimeStamp());
             sendToLogger(message, "Receive accepted.", willLog);
         }
 
