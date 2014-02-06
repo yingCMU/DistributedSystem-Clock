@@ -10,19 +10,18 @@ public class MulticastMessage extends TimeStampMessage {
 	private static final long serialVersionUID = 1L;
 	private int multicastSeq;
 	private String groupID;
-	private String source;
 	private MulticastType type;
 
 	
-	public MulticastMessage(String source,  String dest, String kind, MulticastType type, Object data) {
+	public MulticastMessage(String src,  String dest, String kind, MulticastType type, Object data) {
 		super( dest, kind, data);
-		this.source = source;
+		this.src = src;
 		this.type = type;
 //		this.setTimeStamp(ts);
 	}
 
-	public MulticastMessage(int multicastSeq, String source, String dest, String kind, MulticastType type, Object data) {
-		this(source,dest, kind , type, data);
+	public MulticastMessage(int multicastSeq, String src, String dest, String kind, MulticastType type, Object data) {
+		this(src,dest, kind , type, data);
 		this.multicastSeq = multicastSeq;
 	}
 
@@ -34,13 +33,7 @@ public class MulticastMessage extends TimeStampMessage {
 		this.multicastSeq = multicastSeq;
 	}
 
-	public String getsource() {
-		return source;
-	}
-
-	public void setsource(String source) {
-		this.source = source;
-	}
+	
 
 	public MulticastType getType() {
 		return type;
@@ -52,14 +45,14 @@ public class MulticastMessage extends TimeStampMessage {
 	
 	@Override
 	public String toString() {
-		return this.multicastSeq + " | " + this.type + "| " + this.getsource() + "->" +this.getSrc() + "->" + this.getDest();
+		return this.multicastSeq + " | " + this.type + "| " + this.getSrc() + "->" +this.getSrc() + "->" + this.getDest();
 	}
 
 	@Override
 	public int hashCode() {
 		final int prime = 31;
 		int result = super.hashCode();
-		result = prime * result + ((source == null) ? 0 : source.hashCode());
+		result = prime * result + ((this.src == null) ? 0 : this.src.hashCode());
 		result = prime * result + multicastSeq;
 		result = prime * result + ((type == null) ? 0 : type.hashCode());
 		return result;
@@ -75,13 +68,13 @@ public class MulticastMessage extends TimeStampMessage {
 		if (this.myDup != null)
 			return this.myDup == other;
 		else
-			return this.getmulticastSeq() == other.getmulticastSeq() && this.getsource().equals(other.getsource());//<src, id> unique
+			return this.getmulticastSeq() == other.getmulticastSeq() && this.getthis.src().equals(other.getthis.src());//<src, id> unique
 	
 	}
 
 	@Override
 	public MulticastMessage clone() throws CloneNotSupportedException {
-		MulticastMessage msg = new MulticastMessage(getmulticastSeq(), getsource(), getSrc(), getDest(), getKind(), type, data);
+		MulticastMessage msg = new MulticastMessage(getmulticastSeq(), getthis.src(), getSrc(), getDest(), getKind(), type, data);
 		msg.setTimeStamp(getTimeStamp());
 		return msg;
 	}

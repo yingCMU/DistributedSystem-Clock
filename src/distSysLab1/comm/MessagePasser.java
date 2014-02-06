@@ -11,6 +11,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import distSysLab1.clock.ClockService;
 import distSysLab1.clock.ClockService.ClockType;
 import distSysLab1.message.MulticastMessage;
+import distSysLab1.message.MulticastType;
 import distSysLab1.message.TimeStampMessage;
 import distSysLab1.model.NodeBean;
 import distSysLab1.model.RuleBean;
@@ -89,8 +90,49 @@ public class MessagePasser {
 
         System.out.println("Local status is: " + this.toString());
     }
+    /*
+     * for multicasting comminication, check if reliable and can be delivered
+     * if valid, return true
+     * else return false and send NACK
+     */
+    public boolean reliableCheck(MulticastMessage msg){
+    	String sender = msg.getSrc();
+    	int senderSeq = msg.getmulticastSeq();
+    	AtomicInteger myExpectingSeq =  recvSeqTracker.get(sender);
+    	if(senderSeq == myExpectingSeq.get()+1){
+    		// in order , no missing
+    		
+    		return true;
+    	}
+    	else if(senderSeq > myExpectingSeq.get()+1){
+    		
+    		// some previous msg missing, 
+    		
+    		// put in holdback queue
+    		recvHoldBackQueue.add(msg);
+    		
+    		//send NACK to the sender
+    		
+    		MulticastMessage NACK = new MulticastMessage(localName, sender, "kind", MulticastType.NACK, null);
+    		send(NACK,true);
+    		
+    		return false;
+    	
+    	}
+    	else{
+    		// S<=R, has already received this msg, just disgard it
+    		// 
+    		return true;
+    	}
+    		
+    }
     
-
+    /*
+     * for multicasting communication, give the msg from recv queue to delivery queue in order by clock
+     */
+    public void deliver(){
+    	//To Do
+    }
     /**
      * For message that need to be logged, send it to the logger.
      * @param msg
