@@ -6,9 +6,11 @@ import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.concurrent.LinkedBlockingDeque;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import distSysLab1.clock.ClockService;
 import distSysLab1.clock.ClockService.ClockType;
+import distSysLab1.message.MulticastMessage;
 import distSysLab1.message.TimeStampMessage;
 import distSysLab1.model.NodeBean;
 import distSysLab1.model.RuleBean;
@@ -24,7 +26,14 @@ public class MessagePasser {
     private HashMap<String, NodeBean> nodeList = new HashMap<String, NodeBean>();
     private ArrayList<RuleBean> sendRules = new ArrayList<RuleBean>();
     private ArrayList<RuleBean> recvRules = new ArrayList<RuleBean>();
-
+/* for multicasting */
+    private HashMap<String, AtomicInteger> recvSeqTracker;
+	ArrayList<String> group;
+	private AtomicInteger lastMultiCastSeq = new AtomicInteger(0);
+	private LinkedBlockingDeque<MulticastMessage> recvHoldBackDelayQueue = new LinkedBlockingDeque<MulticastMessage>();
+	private LinkedBlockingDeque<MulticastMessage> recvHoldBackQueue = new LinkedBlockingDeque<MulticastMessage>();
+    
+    
     private String configFile;
     private String localName;
     private String loggerName;
@@ -80,6 +89,7 @@ public class MessagePasser {
 
         System.out.println("Local status is: " + this.toString());
     }
+    
 
     /**
      * For message that need to be logged, send it to the logger.
@@ -223,6 +233,7 @@ public class MessagePasser {
         }
 
         if(message != null) {
+           // clockServ.updateTimeStampOnReceive(message.getTimeStamp());
             sendToLogger(message, "Receive accepted.", willLog);
         }
 
@@ -251,4 +262,20 @@ public class MessagePasser {
         return "MessagePasser [configFile=" + configFile + ", localName=" + localName
                 + ", listenSocket=" + listener.toString() + "]";
     }
+
+	public AtomicInteger getLastMultiCastSeq() {
+		return lastMultiCastSeq;
+	}
+
+	public void setLastMultiCastSeq(AtomicInteger lastMultiCastSeq) {
+		this.lastMultiCastSeq = lastMultiCastSeq;
+	}
+
+	public HashMap<String, AtomicInteger> getRecvSeqTracker() {
+		return recvSeqTracker;
+	}
+
+	public void setRecvSeqTracker(HashMap<String, AtomicInteger> recvSeqTracker) {
+		this.recvSeqTracker = recvSeqTracker;
+	}
 }
