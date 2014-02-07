@@ -122,13 +122,24 @@ public class MessagePasser {
      * else return false and send NACK
      */
     public boolean reliableCheck(MulticastMessage msg, RuleAction action){
-    	String sender = msg.getSrc();
-    	int senderSeq = msg.getmulticastSeq();
-    	if( checkOne(sender, msg, senderSeq))
-    		return checkACKs(msg);
-    	else
-    		return true;
-    		
+    	switch (msg.getType()) {
+    	case SEND:
+    		{
+	    	String sender = msg.getSrc();
+	    	int senderSeq = msg.getmulticastSeq();
+	    	if( checkOne(sender, msg, senderSeq))
+	    		return checkACKs(msg);
+	    	else
+	    		return true;
+	    	
+    	}
+    	case ACK:
+    		break;
+    	case NACK:
+    		System.out.println("u should resend to "+msg.getSrc());
+    	   // to do 
+     }
+		return false;
     }
     
     /*
@@ -177,7 +188,7 @@ public class MessagePasser {
     		
     		//send NACK to the sender
     		
-    		MulticastMessage NACK = new MulticastMessage(-1,localName, sender, "kind", MulticastType.NACK, null);
+    		TimeStampMessage NACK = new MulticastMessage(-1,localName, sender, "kind", MulticastType.NACK, null);
     		System.out.println(localName+" is sending NACK to "+sender);
     		send(NACK,true);
     		// in receiver thread, when you recv NACK  , then what?? to do
@@ -238,7 +249,7 @@ public class MessagePasser {
     	while(it.hasNext()){
     		String recv = it.next();
     		if(!recv.equals(localName))
-    			send(message,true);
+    			send(message,false);
     		
     	}
     }

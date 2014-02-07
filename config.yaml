@@ -14,7 +14,7 @@ configuration:
                   # May be changed for further communication as usual
     - name: bob
       ip: 128.237.146.33
-      port: 14255    
+      port: 14256    
     - name: log
       ip: 192.168.1.145
       port: 11111

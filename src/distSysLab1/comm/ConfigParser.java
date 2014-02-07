@@ -234,7 +234,7 @@ public class ConfigParser {
 		HashSet<String> groupList= new HashSet<String>();
 		groupList.add("alice");
 		groupList.add("bob");
-		groupList.add("david");
+		//sgroupList.add("david");
 		return groupList;
 		/*
 		groupList.put("alice", new String[] {"alice", "bob", "charlie"});

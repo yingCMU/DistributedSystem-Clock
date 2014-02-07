@@ -18,7 +18,7 @@ public class TestRecv {
 	 */
 	public static void main(String[] args) throws IOException {
 		// TODO Auto-generated method stub
-		String src = "alice";
+		String src = "bob";
 		MessagePasser messagePasser = MessagePasser.
 				getInstance("./config.yaml", src,"log");
         messagePasser.startSender();
@@ -27,7 +27,7 @@ public class TestRecv {
         String [] dest = {"bob","david","alice"};
         BufferedReader in = new BufferedReader(new InputStreamReader(System.in));
         in.readLine();
-        messagePasser.receive(true);
+        messagePasser.receive(false);
         //MulticastMessage msg = new MulticastMessage(seq++,src,dest[0], "kind",MulticastType.SEND," data");
         //messagePasser.multisend(msg, "groupID");
 	}

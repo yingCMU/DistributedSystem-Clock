@@ -24,6 +24,10 @@ public class TestSend {
         String [] dest = {"bob","david",""};
         MulticastMessage msg = new MulticastMessage(seq++,src,dest[0], "kind",MulticastType.SEND," data");
         messagePasser.multisend(msg, "groupID");
+        msg = new MulticastMessage(seq++,src,dest[0], "kind",MulticastType.SEND," data");
+        messagePasser.multisend(msg, "groupID");
+        msg = new MulticastMessage(seq+2,src,dest[0], "kind",MulticastType.SEND," data");
+        messagePasser.multisend(msg, "groupID");
 	}
 
 }
