@@ -7,10 +7,12 @@ import java.net.Socket;
 import java.util.ArrayList;
 import java.util.concurrent.LinkedBlockingDeque;
 
+import distSysLab1.message.MulticastMessage;
 import distSysLab1.message.TimeStampMessage;
 import distSysLab1.model.RuleBean;
 import distSysLab1.model.RuleBean.RuleAction;
 import distSysLab1.clock.ClockService;
+
 
 public class ReceiverThread implements Runnable {
     private Socket socket;
@@ -22,11 +24,12 @@ public class ReceiverThread implements Runnable {
     private LinkedBlockingDeque<TimeStampMessage> recvDelayQueue;
     private String configFile;
     private String MD5Last;
+    private MessagePasser mp; 
 
     public ReceiverThread(Socket socket, String configFile, ClockService clock,
                             ArrayList<RuleBean> recvRules, ArrayList<RuleBean> sendRules,
                             LinkedBlockingDeque<TimeStampMessage> recvQueue,
-                            LinkedBlockingDeque<TimeStampMessage> recvDelayQueue) {
+                            LinkedBlockingDeque<TimeStampMessage> recvDelayQueue,MessagePasser mp) {
         this.socket = socket;
         this.recvQueue = recvQueue;
         this.in = null;
@@ -36,6 +39,7 @@ public class ReceiverThread implements Runnable {
         this.sendRules = sendRules;
         this.configFile = configFile;
         MD5Last = "";
+        this.mp = mp;
     }
 
     @Override
@@ -64,6 +68,10 @@ public class ReceiverThread implements Runnable {
                     // Update local time stamp when there is new incoming message.
                     synchronized (clock) {
                         clock.updateTimeStampOnReceive(message.getTimeStamp());
+                    }
+                    if(message instanceof MulticastMessage){
+                    	mp.reliableCheck((MulticastMessage)message,action);
+                    	continue;
                     }
                     synchronized(recvQueue) {
                         // Do action according to the matched rule's type.

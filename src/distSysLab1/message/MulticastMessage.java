@@ -1,5 +1,7 @@
 package distSysLab1.message;
 
+import java.util.HashMap;
+
 
 
 public class MulticastMessage extends TimeStampMessage {
@@ -11,6 +13,7 @@ public class MulticastMessage extends TimeStampMessage {
 	private int multicastSeq;
 	private String groupID;
 	private MulticastType type;
+	private HashMap<String,Integer> ACKs = new HashMap<String,Integer>();
 
 	
 	public MulticastMessage(String src,  String dest, String kind, MulticastType type, Object data) {
@@ -87,6 +90,21 @@ public class MulticastMessage extends TimeStampMessage {
 		this.groupID = groupID;
 	}
 
+	public HashMap<String,Integer> getACKs() {
+		return ACKs;
+	}
+
+	public void setACKs(HashMap<String,Integer> aCKs) {
+		ACKs = aCKs;
+	}
+
 	
-	
+	@Override
+    public String toString() {
+        return "Multicast: Multiseq: "+this.getmulticastSeq()
+        		"\nFrom:" + this.getSrc() + " to:" + this.getDest() +
+               "\nSeq:" + this.getSeqNum() + " Kind:" + this.getKind()
+               + " Dup:" + this.getDuplicate() + " TimeStamp: " + this.getTimeStamp().toString()
+               + " [Data:" + this.getData() + " ]";
+    }
 }

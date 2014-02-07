@@ -5,6 +5,8 @@ import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Iterator;
+import java.util.Map.Entry;
 import java.util.concurrent.LinkedBlockingDeque;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -44,6 +46,7 @@ public class MessagePasser {
     private ListenerThread listener;
     private SenderThread sender;
     private ClockType clockType;
+	private HashMap<String, NodeBean> groupList;
 
     /**
      * Actual constructor for MessagePasser
@@ -61,6 +64,7 @@ public class MessagePasser {
         ConfigParser.configurationFile = configFile;
         String type = ConfigParser.readClock();
         nodeList = ConfigParser.readConfig();
+        groupList = ConfigParser.readGroup();
         sendRules = ConfigParser.readSendRules();
         recvRules = ConfigParser.readRecvRules();
         MD5Last = ConfigParser.getMD5Checksum(configFile);
@@ -90,40 +94,31 @@ public class MessagePasser {
 
         System.out.println("Local status is: " + this.toString());
     }
+    private boolean checkACKs(MulticastMessage msg){
+    	Iterator<Entry<String, Integer>> it = msg.getACKs().entrySet().iterator();
+    	while(it.hasNext()){
+    		 Entry<String, Integer> ent = it.next();
+    		 String sender=ent.getKey();
+    		 int senderSeq = ent.getValue();
+    		 if(!checkOne(sender,null,senderSeq))
+    			 return false;
+    		
+    	}
+    	return true;
+    
+    }
     /*
      * for multicasting comminication, check if reliable and can be delivered
      * if valid, return true
      * else return false and send NACK
      */
-    public boolean reliableCheck(MulticastMessage msg){
+    public boolean reliableCheck(MulticastMessage msg, RuleAction action){
     	String sender = msg.getSrc();
     	int senderSeq = msg.getmulticastSeq();
-    	AtomicInteger myExpectingSeq =  recvSeqTracker.get(sender);
-    	if(senderSeq == myExpectingSeq.get()+1){
-    		// in order , no missing
-    		
+    	if( checkOne(sender, msg, senderSeq))
+    		return checkACKs(msg);
+    	else
     		return true;
-    	}
-    	else if(senderSeq > myExpectingSeq.get()+1){
-    		
-    		// some previous msg missing, 
-    		
-    		// put in holdback queue
-    		recvHoldBackQueue.add(msg);
-    		
-    		//send NACK to the sender
-    		
-    		MulticastMessage NACK = new MulticastMessage(localName, sender, "kind", MulticastType.NACK, null);
-    		send(NACK,true);
-    		
-    		return false;
-    	
-    	}
-    	else{
-    		// S<=R, has already received this msg, just disgard it
-    		// 
-    		return true;
-    	}
     		
     }
     
@@ -154,6 +149,39 @@ public class MessagePasser {
 
             sendQueue.add(wrapper);
         }
+    }
+    private boolean checkOne(String sender,MulticastMessage msg, int senderSeq){
+    	AtomicInteger myExpectingSeq =  recvSeqTracker.get(sender);
+    	if(senderSeq == myExpectingSeq.get()+1){
+    		// in order , no missing
+    		System.out.println("multicast in order, seq->"+senderSeq);
+    		myExpectingSeq.incrementAndGet();
+    		return true;
+    	}
+    	else if(senderSeq > myExpectingSeq.get()+1){
+    		System.out.println("multicast missing, seq->"+senderSeq);
+    		// some previous msg missing, 
+    		
+    		// put in holdback queue
+    		if(msg!=null)
+    		recvHoldBackQueue.add(msg);
+    		
+    		//send NACK to the sender
+    		
+    		MulticastMessage NACK = new MulticastMessage(localName, sender, "kind", MulticastType.NACK, null);
+    		System.out.println(localName+" is sending NACK to "+sender);
+    		send(NACK,true);
+    		// in receiver thread, when you recv NACK  , then what?? to do
+    		
+    		return false;
+    	
+    	}
+    	else{
+    		System.out.println("multicast duplicate, disgard it ");
+    		// S<=R, has already received this msg, just disgard it
+    		// 
+    		return true;
+    	}
     }
 
     /**

@@ -20,11 +20,12 @@ public class ListenerThread implements Runnable {
     private ServerSocket listenSocket;
     private Thread thread;
     private ClockService clock;
+    private MessagePasser mp;
 
     public ListenerThread(int port, String configFile,
                             ArrayList<RuleBean> recvRules, ArrayList<RuleBean> sendRules,
                             LinkedBlockingDeque<TimeStampMessage> recvQueue,
-                            LinkedBlockingDeque<TimeStampMessage> recvDelayQueue, ClockService clock) {
+                            LinkedBlockingDeque<TimeStampMessage> recvDelayQueue, ClockService clock, MessagePasser mp) {
         this.port = port;
         this.clock = clock;
         this.recvQueue = recvQueue;
@@ -32,6 +33,7 @@ public class ListenerThread implements Runnable {
         this.recvRules = recvRules;
         this.sendRules = sendRules;
         this.configFile = configFile;
+        this.mp=mp;
     }
 
     @Override
@@ -44,7 +46,7 @@ public class ListenerThread implements Runnable {
 
                 // Create a new thread for new incoming connection.
                 thread = new Thread(new ReceiverThread(socket, configFile, clock,
-                                                       recvRules, sendRules, recvQueue, recvDelayQueue));
+                                                       recvRules, sendRules, recvQueue, recvDelayQueue,mp));
                 thread.start();
             }
         }
