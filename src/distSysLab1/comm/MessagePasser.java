@@ -5,6 +5,7 @@ import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Map.Entry;
 import java.util.concurrent.LinkedBlockingDeque;
@@ -30,7 +31,7 @@ public class MessagePasser {
     private ArrayList<RuleBean> sendRules = new ArrayList<RuleBean>();
     private ArrayList<RuleBean> recvRules = new ArrayList<RuleBean>();
 /* for multicasting */
-    private HashMap<String, AtomicInteger> recvSeqTracker;
+    private HashMap<String, AtomicInteger> recvSeqTracker=new HashMap<String, AtomicInteger>();
 	ArrayList<String> group;
 	private AtomicInteger lastMultiCastSeq = new AtomicInteger(0);
 	private LinkedBlockingDeque<MulticastMessage> recvHoldBackDelayQueue = new LinkedBlockingDeque<MulticastMessage>();
@@ -46,7 +47,7 @@ public class MessagePasser {
     private ListenerThread listener;
     private SenderThread sender;
     private ClockType clockType;
-	private HashMap<String, NodeBean> groupList;
+	private HashSet<String> groupList;
 
     /**
      * Actual constructor for MessagePasser
@@ -60,11 +61,12 @@ public class MessagePasser {
         this.localName = localName;
         this.configFile = configFile;
         this.curSeqNum = 0;
-
+        
         ConfigParser.configurationFile = configFile;
         String type = ConfigParser.readClock();
         nodeList = ConfigParser.readConfig();
         groupList = ConfigParser.readGroup();
+        
         sendRules = ConfigParser.readSendRules();
         recvRules = ConfigParser.readRecvRules();
         MD5Last = ConfigParser.getMD5Checksum(configFile);
@@ -88,11 +90,15 @@ public class MessagePasser {
         }
         else {
             listener = new ListenerThread(nodeList.get(localName).getPort(), configFile,
-                                            recvRules, sendRules, recvQueue, recvDelayQueue,clockServ);
+                                            recvRules, sendRules, recvQueue, recvDelayQueue,clockServ,this);
             sender = new SenderThread(sendQueue, sendDelayQueue, nodeList);
         }
 
         System.out.println("Local status is: " + this.toString());
+    }
+    private void init(){
+    	
+    	//recvSeqTracker.entrySet().
     }
     private boolean checkACKs(MulticastMessage msg){
     	Iterator<Entry<String, Integer>> it = msg.getACKs().entrySet().iterator();
@@ -168,7 +174,7 @@ public class MessagePasser {
     		
     		//send NACK to the sender
     		
-    		MulticastMessage NACK = new MulticastMessage(localName, sender, "kind", MulticastType.NACK, null);
+    		MulticastMessage NACK = new MulticastMessage(-1,localName, sender, "kind", MulticastType.NACK, null);
     		System.out.println(localName+" is sending NACK to "+sender);
     		send(NACK,true);
     		// in receiver thread, when you recv NACK  , then what?? to do
@@ -223,7 +229,16 @@ public class MessagePasser {
     public static MessagePasser getInstance() {
         return instance;
     }
-
+    public void multisend(TimeStampMessage message,String group) {
+    	Iterator<String> it = groupList.iterator();
+    	
+    	while(it.hasNext()){
+    		String recv = it.next();
+    		if(!recv.equals(localName))
+    			send(message,true);
+    		
+    	}
+    }
     /**
      * Send a message.
      *

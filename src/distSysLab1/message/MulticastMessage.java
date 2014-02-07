@@ -15,16 +15,10 @@ public class MulticastMessage extends TimeStampMessage {
 	private MulticastType type;
 	private HashMap<String,Integer> ACKs = new HashMap<String,Integer>();
 
-	
-	public MulticastMessage(String src,  String dest, String kind, MulticastType type, Object data) {
+	public MulticastMessage(int multicastSeq, String src, String dest, String kind, MulticastType type, Object data) {
 		super( dest, kind, data);
 		this.src = src;
 		this.type = type;
-//		this.setTimeStamp(ts);
-	}
-
-	public MulticastMessage(int multicastSeq, String src, String dest, String kind, MulticastType type, Object data) {
-		this(src,dest, kind , type, data);
 		this.multicastSeq = multicastSeq;
 	}
 
@@ -46,10 +40,7 @@ public class MulticastMessage extends TimeStampMessage {
 		this.type = type;
 	}
 	
-	@Override
-	public String toString() {
-		return this.multicastSeq + " | " + this.type + "| " + this.getSrc() + "->" +this.getSrc() + "->" + this.getDest();
-	}
+	
 
 	@Override
 	public int hashCode() {
@@ -101,7 +92,7 @@ public class MulticastMessage extends TimeStampMessage {
 	
 	@Override
     public String toString() {
-        return "Multicast: Multiseq: "+this.getmulticastSeq()
+        return "Multicast: Multiseq: "+this.getmulticastSeq()+
         		"\nFrom:" + this.getSrc() + " to:" + this.getDest() +
                "\nSeq:" + this.getSeqNum() + " Kind:" + this.getKind()
                + " Dup:" + this.getDuplicate() + " TimeStamp: " + this.getTimeStamp().toString()

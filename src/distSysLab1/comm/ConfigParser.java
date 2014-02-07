@@ -11,6 +11,7 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Map;
 
@@ -227,4 +228,22 @@ public class ConfigParser {
 
         return result;
     }
+
+	public static HashSet<String>  readGroup() {
+		// TODO Auto-generated method stub
+		HashSet<String> groupList= new HashSet<String>();
+		groupList.add("alice");
+		groupList.add("bob");
+		groupList.add("david");
+		return groupList;
+		/*
+		groupList.put("alice", new String[] {"alice", "bob", "charlie"});
+		groupList.put("bob", new String[] {"bob", "daphnie", "frank"});
+		groupList.put("charlie", new String[] {"charlie", "erica", "frank"});
+		groupList.put("daphnie", new String[] {"alice", "daphnie", "erica"});
+		groupList.put("erica", new String[] {"bob", "erica", "gary"});
+		groupList.put("frank", new String[] {"alice", "frank", "gary"});
+		groupList.put("gary", new String[] {"charlie", "daphnie", "gary"});
+		*/
+	}
 }
