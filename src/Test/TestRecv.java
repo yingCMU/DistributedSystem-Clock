@@ -18,7 +18,7 @@ public class TestRecv {
 	 */
 	public static void main(String[] args) throws IOException {
 		// TODO Auto-generated method stub
-		String src = "bob";
+		String src = "alice";
 		MessagePasser messagePasser = MessagePasser.
 				getInstance("./config.yaml", src,"log");
         messagePasser.startSender();

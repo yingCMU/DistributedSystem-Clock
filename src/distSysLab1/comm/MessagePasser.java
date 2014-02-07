@@ -66,7 +66,7 @@ public class MessagePasser {
         String type = ConfigParser.readClock();
         nodeList = ConfigParser.readConfig();
         groupList = ConfigParser.readGroup();
-        
+        init();
         sendRules = ConfigParser.readSendRules();
         recvRules = ConfigParser.readRecvRules();
         MD5Last = ConfigParser.getMD5Checksum(configFile);
@@ -85,7 +85,7 @@ public class MessagePasser {
             System.exit(0);
         }
         else if (!InetAddress.getLocalHost().getHostAddress().toString().equals(nodeList.get(localName).getIp())) {
-            System.err.println("Local ip do not match configuration file.");
+            System.err.println(InetAddress.getLocalHost().getHostAddress().toString()+"Local ip do not match configuration file.");
             System.exit(0);
         }
         else {
@@ -97,8 +97,11 @@ public class MessagePasser {
         System.out.println("Local status is: " + this.toString());
     }
     private void init(){
-    	
-    	//recvSeqTracker.entrySet().
+    	Iterator<String> it = groupList.iterator();
+    	while(it.hasNext()){
+    		recvSeqTracker.put(it.next(), new AtomicInteger(0));
+    		
+    	}
     }
     private boolean checkACKs(MulticastMessage msg){
     	Iterator<Entry<String, Integer>> it = msg.getACKs().entrySet().iterator();

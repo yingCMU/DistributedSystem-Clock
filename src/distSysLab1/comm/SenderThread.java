@@ -41,6 +41,7 @@ public class SenderThread implements Runnable {
                     objectOutputStream.flush();
                 }
                 catch (ConnectException e) {
+                	e.printStackTrace();
                     System.err.println("ERROR: TimeStampMessage send failure, node offline " + message.toString());
                 }
                 catch (IOException e) {

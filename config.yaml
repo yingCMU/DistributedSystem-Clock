@@ -9,12 +9,12 @@ clockType:
     - Type: Vector
 configuration:
     - name: alice
-      ip: 192.168.1.145
+      ip: 128.237.146.30
       port: 12344 # This is the incoming port on which MP will listen
                   # May be changed for further communication as usual
     - name: bob
-      ip: 192.168.1.145
-      port: 14255     
+      ip: 128.237.146.33
+      port: 14255    
     - name: log
       ip: 192.168.1.145
       port: 11111
