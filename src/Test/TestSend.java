@@ -23,10 +23,13 @@ public class TestSend {
         int seq=1;
         String [] dest = {"bob","david",""};
         MulticastMessage msg = new MulticastMessage(seq++,src,dest[0], "kind",MulticastType.SEND," data");
+        // in order 1
         messagePasser.multisend(msg, "groupID");
         msg = new MulticastMessage(seq++,src,dest[0], "kind",MulticastType.SEND," data");
+       // in order 2
         messagePasser.multisend(msg, "groupID");
-        msg = new MulticastMessage(seq+2,src,dest[0], "kind",MulticastType.SEND," data");
+        // out of order  5
+        msg = new MulticastMessage(seq+1,src,dest[0], "kind",MulticastType.SEND," data");
         messagePasser.multisend(msg, "groupID");
 	}
 

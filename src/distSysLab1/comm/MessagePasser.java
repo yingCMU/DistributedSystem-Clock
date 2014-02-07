@@ -25,7 +25,9 @@ public class MessagePasser {
     private ClockService clockServ;
     private LinkedBlockingDeque<TimeStampMessage> sendQueue = new LinkedBlockingDeque<TimeStampMessage>();
     private LinkedBlockingDeque<TimeStampMessage> sendDelayQueue = new LinkedBlockingDeque<TimeStampMessage>();
-    private LinkedBlockingDeque<TimeStampMessage> recvQueue = new LinkedBlockingDeque<TimeStampMessage>();
+    // for queueing msg in correct order, ready to deliver to the app layer
+    private LinkedBlockingDeque<TimeStampMessage> deliverQueue = new LinkedBlockingDeque<TimeStampMessage>();
+    
     private LinkedBlockingDeque<TimeStampMessage> recvDelayQueue = new LinkedBlockingDeque<TimeStampMessage>();
     private HashMap<String, NodeBean> nodeList = new HashMap<String, NodeBean>();
     private ArrayList<RuleBean> sendRules = new ArrayList<RuleBean>();
@@ -34,9 +36,10 @@ public class MessagePasser {
     private HashMap<String, AtomicInteger> recvSeqTracker=new HashMap<String, AtomicInteger>();
 	ArrayList<String> group;
 	private AtomicInteger lastMultiCastSeq = new AtomicInteger(0);
-	private LinkedBlockingDeque<MulticastMessage> recvHoldBackDelayQueue = new LinkedBlockingDeque<MulticastMessage>();
+	//for multicast msg that is out of order, put them temporily here 
 	private LinkedBlockingDeque<MulticastMessage> recvHoldBackQueue = new LinkedBlockingDeque<MulticastMessage>();
-    
+	private LinkedBlockingDeque<MulticastMessage> recvHoldBackDelayQueue = new LinkedBlockingDeque<MulticastMessage>();
+	
     
     private String configFile;
     private String localName;
@@ -90,7 +93,7 @@ public class MessagePasser {
         }
         else {
             listener = new ListenerThread(nodeList.get(localName).getPort(), configFile,
-                                            recvRules, sendRules, recvQueue, recvDelayQueue,clockServ,this);
+                                            recvRules, sendRules, deliverQueue, recvDelayQueue,clockServ,this);
             sender = new SenderThread(sendQueue, sendDelayQueue, nodeList);
         }
 
@@ -133,11 +136,10 @@ public class MessagePasser {
 	    		return true;
 	    	
     	}
-    	case ACK:
-    		break;
     	case NACK:
-    		System.out.println("u should resend to "+msg.getSrc());
-    	   // to do 
+    		
+    		System.out.println("NACK recved, u should resend to "+msg.getSrc());
+    	   // to do, where to find the sent multicast msg?? 
      }
 		return false;
     }
@@ -174,8 +176,13 @@ public class MessagePasser {
     	AtomicInteger myExpectingSeq =  recvSeqTracker.get(sender);
     	if(senderSeq == myExpectingSeq.get()+1){
     		// in order , no missing
+    		deliverQueue.add(msg);
     		System.out.println("multicast in order, seq->"+senderSeq);
     		myExpectingSeq.incrementAndGet();
+    		/*when is recvHoldBackQueue correctly receive missing msg, give
+    		those in order to deliver queue in clock assending order*/
+        	please implement this delivery in clock order
+    		deliver(recvHoldBackQueue);
     		return true;
     	}
     	else if(senderSeq > myExpectingSeq.get()+1){
@@ -184,7 +191,7 @@ public class MessagePasser {
     		
     		// put in holdback queue
     		if(msg!=null)
-    		recvHoldBackQueue.add(msg);
+    	  	recvHoldBackQueue.add(msg);
     		
     		//send NACK to the sender
     		
@@ -325,9 +332,9 @@ public class MessagePasser {
      */
     public TimeStampMessage receive(Boolean willLog) {
         TimeStampMessage message = null;
-        synchronized (recvQueue) {
-            if (!recvQueue.isEmpty()) {
-                message = recvQueue.poll();
+        synchronized (deliverQueue) {
+            if (!deliverQueue.isEmpty()) {
+                message = deliverQueue.poll();
             }
         }
 
