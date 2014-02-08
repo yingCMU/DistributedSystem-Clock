@@ -7,12 +7,15 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Set;
 import java.util.concurrent.LinkedBlockingDeque;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import distSysLab1.clock.ClockService;
 import distSysLab1.clock.ClockService.ClockType;
+import distSysLab1.message.Message;
 import distSysLab1.message.MulticastMessage;
 import distSysLab1.message.MulticastType;
 import distSysLab1.message.TimeStampMessage;
@@ -33,7 +36,8 @@ public class MessagePasser {
     private ArrayList<RuleBean> sendRules = new ArrayList<RuleBean>();
     private ArrayList<RuleBean> recvRules = new ArrayList<RuleBean>();
 /* for multicasting */
-    private HashMap<String, AtomicInteger> recvSeqTracker=new HashMap<String, AtomicInteger>();
+    private HashMap<String, HashMap<String,AtomicInteger>>  recvSeqTracker=new HashMap<String, HashMap<String,AtomicInteger>>();
+    private HashMap<String, Integer> groupSendSeqTracker = new HashMap<String, Integer>(); 
 	ArrayList<String> group;
 	private AtomicInteger lastMultiCastSeq = new AtomicInteger(0);
 	//for multicast msg that is out of order, put them temporily here 
@@ -50,7 +54,7 @@ public class MessagePasser {
     private ListenerThread listener;
     private SenderThread sender;
     private ClockType clockType;
-	private HashSet<String> groupList;
+	private HashMap<String, ArrayList<String>> groupMap;
 
     /**
      * Actual constructor for MessagePasser
@@ -68,7 +72,7 @@ public class MessagePasser {
         ConfigParser.configurationFile = configFile;
         String type = ConfigParser.readClock();
         nodeList = ConfigParser.readConfig();
-        groupList = ConfigParser.readGroup();
+        groupMap = ConfigParser.readGroup();
         init();
         sendRules = ConfigParser.readSendRules();
         recvRules = ConfigParser.readRecvRules();
@@ -99,26 +103,37 @@ public class MessagePasser {
 
         System.out.println("Local status is: " + this.toString());
     }
+    
+    
+    //Initialize MultiCast Sequence Trackers
     private void init(){
-    	Iterator<String> it = groupList.iterator();
-    	while(it.hasNext()){
-    		recvSeqTracker.put(it.next(), new AtomicInteger(0));
-    		
+    	
+    	for(Entry<String, ArrayList<String>> entry : groupMap.entrySet())
+    	{
+    		groupSendSeqTracker.put(entry.getKey(), 0);
+    		recvSeqTracker.put(entry.getKey(), new HashMap<String,AtomicInteger>());
+    		for(String member : entry.getValue())
+    		{
+    			recvSeqTracker.get(entry.getKey()).put(member, new AtomicInteger(0) ) ;
+    		}
     	}
     }
+    
+    
     private boolean checkACKs(MulticastMessage msg){
-    	Iterator<Entry<String, Integer>> it = msg.getACKs().entrySet().iterator();
+    	Iterator<Entry<String, AtomicInteger>> it = msg.getACKs().entrySet().iterator();
     	while(it.hasNext()){
-    		 Entry<String, Integer> ent = it.next();
+    		 Entry<String, AtomicInteger> ent = it.next();
     		 String sender=ent.getKey();
-    		 int senderSeq = ent.getValue();
+    		 int senderSeq = ent.getValue().get();
     		 if(!checkOne(sender,null,senderSeq))
     			 return false;
     		
     	}
     	return true;
-    
     }
+    
+    
     /*
      * for multicasting comminication, check if reliable and can be delivered
      * if valid, return true
@@ -143,6 +158,8 @@ public class MessagePasser {
      }
 		return false;
     }
+    
+    
     
     /*
      * for multicasting communication, give the msg from recv queue to delivery queue in order by clock
@@ -180,9 +197,9 @@ public class MessagePasser {
     		System.out.println("multicast in order, seq->"+senderSeq);
     		myExpectingSeq.incrementAndGet();
     		/*when is recvHoldBackQueue correctly receive missing msg, give
-    		those in order to deliver queue in clock assending order*/
+    		those in order to deliver queue in clock assending order
         	please implement this delivery in clock order
-    		deliver(recvHoldBackQueue);
+    		deliver(recvHoldBackQueue)*/;
     		return true;
     	}
     	else if(senderSeq > myExpectingSeq.get()+1){
@@ -250,18 +267,36 @@ public class MessagePasser {
     public static MessagePasser getInstance() {
         return instance;
     }
-    public void multisend(TimeStampMessage message,String group) {
+    
+    /**
+     * Multicast Send
+     *
+     * @return void
+     */
+    public void send(TimeStampMessage message, String groupID) throws IllegalArgumentException
+    {
+    	ArrayList<String> groupList = groupMap.get(groupID);
     	Iterator<String> it = groupList.iterator();
     	
-    	while(it.hasNext()){
-    		String recv = it.next();
-    		if(!recv.equals(localName))
-    			send(message,false);
-    		
+    	//Check if node is part of group
+    	if(!groupList.contains(localName))
+    		throw new IllegalArgumentException();
+    	
+    	//Increment sendSeqNumber for this group
+    	groupSendSeqTracker.put(groupID, groupSendSeqTracker.get(groupID) + 1 );
+    	
+    	//Send Message to each node in group including yourself
+    	while(it.hasNext())
+    	{
+    		MulticastMessage M = new MulticastMessage(groupSendSeqTracker.get(groupID), localName, it.next(), message.getKind(), MulticastType.SEND, message.getData() );
+    		M.setGroupID(groupID);
+    		M.setACKs(recvSeqTracker.get(groupID));
+    		send(M,false);
     	}
     }
+    
     /**
-     * Send a message.
+     * Unicast send
      *
      * @param message The message need to be sent.
      */
@@ -271,8 +306,14 @@ public class MessagePasser {
         message.setSeqNum(curSeqNum++);
         this.getClockServ().updateTimeStampOnSend();
         message.setTimeStamp(clockServ.getCurTimeStamp());
+        
+        //Rule check and Send
+        internalSend(message, willLog);
+    }
 
-        // Check if the configuration file has been changed.
+    private void internalSend(TimeStampMessage message, boolean willLog)
+    {
+    	// Check if the configuration file has been changed.
         String MD5 = ConfigParser.getMD5Checksum(configFile);
         if (!MD5.equals(MD5Last)) {
             sendRules = ConfigParser.readSendRules();
@@ -285,6 +326,7 @@ public class MessagePasser {
         for (RuleBean rule : sendRules) {
             if (rule.isMatch(message)) {
                 action = rule.getAction();
+                break;
             }
         }
 
@@ -300,7 +342,7 @@ public class MessagePasser {
             sendQueue.add(message);
             sendToLogger(message, "Sender accepted.", willLog);
             // Add a duplicate message into sendQueue.
-            TimeStampMessage copy = (TimeStampMessage) message.copyOf();
+            TimeStampMessage copy = message.copyOf();
             copy.setDuplicate(true);
             sendQueue.add(copy);
             sendToLogger(copy, "Sender duplicated.", willLog);
@@ -323,7 +365,6 @@ public class MessagePasser {
             sendDelayQueue.clear();
         }
     }
-
     /**
      * Deliver message from the receive queue
      * @param willLog
@@ -377,11 +418,11 @@ public class MessagePasser {
 		this.lastMultiCastSeq = lastMultiCastSeq;
 	}
 
-	public HashMap<String, AtomicInteger> getRecvSeqTracker() {
+	public HashMap<String, HashMap<String, AtomicInteger>> getRecvSeqTracker() {
 		return recvSeqTracker;
 	}
 
-	public void setRecvSeqTracker(HashMap<String, AtomicInteger> recvSeqTracker) {
+	public void setRecvSeqTracker(HashMap<String, HashMap<String, AtomicInteger>> recvSeqTracker) {
 		this.recvSeqTracker = recvSeqTracker;
 	}
 }

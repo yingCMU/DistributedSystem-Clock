@@ -229,13 +229,28 @@ public class ConfigParser {
         return result;
     }
 
-	public static HashSet<String>  readGroup() {
+	public static HashMap<String, ArrayList<String>>  readGroup() {
 		// TODO Auto-generated method stub
-		HashSet<String> groupList= new HashSet<String>();
-		groupList.add("alice");
-		groupList.add("bob");
-		//sgroupList.add("david");
-		return groupList;
+		HashMap<String, ArrayList<String>> groupList= new HashMap<String, ArrayList<String>>();
+        Map<String, ArrayList<Map<String, Object>>> obj = init();
+
+        for(Map.Entry<String, ArrayList<Map<String, Object>>> entrys : obj.entrySet()) 
+        {
+            if(entrys.getKey().equalsIgnoreCase("groups"))
+        	{
+	        	Iterator<Map<String, Object>> i = entrys.getValue().iterator();
+	        	while(i.hasNext()) 
+	            {
+	                Map<String, Object> group = (Map<String, Object>) i.next();
+	                String name =  (String) group.get("name");
+	                ArrayList<String> members = (ArrayList<String>) group.get("members");
+	                System.out.println(name);
+	                System.out.println(members.toString());
+	            }
+            }
+        }
+        
+        return groupList;
 		/*
 		groupList.put("alice", new String[] {"alice", "bob", "charlie"});
 		groupList.put("bob", new String[] {"bob", "daphnie", "frank"});

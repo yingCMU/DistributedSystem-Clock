@@ -1,6 +1,7 @@
 package distSysLab1.message;
 
 import java.util.HashMap;
+import java.util.concurrent.atomic.AtomicInteger;
 
 
 
@@ -13,7 +14,7 @@ public class MulticastMessage extends TimeStampMessage {
 	private int multicastSeq;
 	private String groupID;
 	private MulticastType type;
-	private HashMap<String,Integer> ACKs = new HashMap<String,Integer>();
+	private HashMap<String,AtomicInteger> ACKs;
 
 	public MulticastMessage(int multicastSeq, String src, String dest, String kind, MulticastType type, Object data) {
 		super( dest, kind, data);
@@ -81,12 +82,12 @@ public class MulticastMessage extends TimeStampMessage {
 		this.groupID = groupID;
 	}
 
-	public HashMap<String,Integer> getACKs() {
+	public HashMap<String,AtomicInteger> getACKs() {
 		return ACKs;
 	}
 
-	public void setACKs(HashMap<String,Integer> aCKs) {
-		ACKs = aCKs;
+	public void setACKs(HashMap<String,AtomicInteger> aCKs) {
+		ACKs = new HashMap<String,AtomicInteger>(aCKs);
 	}
 
 	
