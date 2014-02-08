@@ -43,8 +43,9 @@ public class MessagePasser {
 	//for multicast msg that is out of order, put them temporily here 
 	private LinkedBlockingDeque<MulticastMessage> recvHoldBackQueue = new LinkedBlockingDeque<MulticastMessage>();
 	private LinkedBlockingDeque<MulticastMessage> recvHoldBackDelayQueue = new LinkedBlockingDeque<MulticastMessage>();
+	private HashMap<String, HashMap<Integer,MulticastMessage>> sentMessageCache = new HashMap<String, HashMap<Integer,MulticastMessage>>(); 
+    private static final int CacheSize = 50;
 	
-    
     private String configFile;
     private String localName;
     private String loggerName;
@@ -111,6 +112,7 @@ public class MessagePasser {
     	for(Entry<String, ArrayList<String>> entry : groupMap.entrySet())
     	{
     		groupSendSeqTracker.put(entry.getKey(), 0);
+    		sentMessageCache.put(entry.getKey(), new HashMap<Integer,MulticastMessage>() );
     		recvSeqTracker.put(entry.getKey(), new HashMap<String,AtomicInteger>());
     		for(String member : entry.getValue())
     		{
@@ -288,11 +290,14 @@ public class MessagePasser {
     	//Send Message to each node in group including yourself
     	while(it.hasNext())
     	{
-    		MulticastMessage M = new MulticastMessage(groupSendSeqTracker.get(groupID), localName, it.next(), message.getKind(), MulticastType.SEND, message.getData() );
+    		MulticastMessage M = new MulticastMessage(groupSendSeqTracker.get(groupID), localName, it.next(), message.getKind(), MulticastType.SEND, message.getData());
     		M.setGroupID(groupID);
     		M.setACKs(recvSeqTracker.get(groupID));
     		send(M,false);
     	}
+    	
+		MulticastMessage M = new MulticastMessage(groupSendSeqTracker.get(groupID), localName, "None" , message.getKind(), MulticastType.SEND, message.getData());
+    	sentMessageCache.get(groupID).put(groupSendSeqTracker.get(groupID) % CacheSize, M);
     }
     
     /**
